@@ -1,0 +1,43 @@
+* Emacs initialization
+
+This org file should be loaded as part of initialization for Emacs 26+.
+Use org-babel-load-file to load the file.
+
+Essentially, the file should be loaded from your init.el using
+#+BEGIN_EXAMPLE
+(require 'package)
+(setq package-enable-at-startup nil)
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/"))
+(package-initialize)
+
+(package-installed-p 'use-package)
+(package-refresh-contents)
+(package-install 'use-package))
+
+(org-babel-load-file (expand-file-name "~/.emacs.d/emacsinit.org"))
+#+END_EXAMPLE
+
+
+** use-package configuration
+   We are going to be using use-package as a package manager and
+   package configuration system. This has to be done first in the
+   file!
+   #+BEGIN_SRC emacs-lisp
+   (eval-when-compile
+   (require 'use-package))
+   #+END_SRC
+
+** evil-mode
+   #+BEGIN_SRC emacs-lisp
+   (use-package evil
+   :ensure t
+   :config
+   (evil-mode 1))
+   #+END_SRC
+
+** General emacs configuration
+   #+BEGIN_SRC emacs-lisp
+   ;; Allow for using just y or n instead of writing yes/no.
+   (fset 'yes-or-no-p 'y-or-n-p)
+   #+END_SRC
