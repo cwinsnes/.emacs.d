@@ -28,17 +28,32 @@ file!
 (setq use-package-always-ensure t))
 #+END_SRC
 
+** Unset and hide items
+#+BEGIN_SRC emacs-lisp
+(dotimes (n 10)
+  (global-unset-key (kbd (format "C-%d" n)))
+  (global-unset-key (kbd (format "M-%d" n)))
+  )
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(use-package diminish)
+#+END_SRC
+
 ** evil-mode - Vim key bindings
 Use Vim key bindings by default. Do note that some of the other
 packages might set evil mode keys to their commands.
 
 #+BEGIN_SRC emacs-lisp
 (use-package evil
+:diminish evil-mode
+:diminish undo-tree-mode
 :init
 (setq evil-want-C-u-scroll t)
 (setq evil-search-module 'evil-search)
 :config
-(evil-mode 1))
+(evil-mode 1)
+(define-key evil-normal-state-map (kbd "C-f") 'find-file))
 
 (use-package evil-org
 :after evil)
@@ -51,6 +66,7 @@ packages might set evil mode keys to their commands.
 Use Ivy as the deafult completion engine for finding files and such.
 #+BEGIN_SRC emacs-lisp
 (use-package ivy
+:diminish ivy-mode
 :config
 (ivy-mode 1)
 (define-key ivy-minibuffer-map [escape] 'minibuffer-keyboard-quit)
@@ -61,6 +77,7 @@ Use counsel and ivy rich to make for nicer interface to Ivy. Ivy-rich
 in particular gives a short preview of each command in the Ivy-list.
 #+BEGIN_SRC emacs-lisp
 (use-package counsel
+:diminish counsel-mode
 :after ivy
 :config
 (counsel-mode 1))
@@ -104,6 +121,7 @@ center popup instead of the default bottom location.
 This package requires Emacs to be at least version 26.
 #+BEGIN_SRC emacs-lisp
 (use-package ivy-posframe
+:diminish ivy-posframe-mode
 :after ivy
 :config
 (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-top-center)))
@@ -119,18 +137,78 @@ With Ivy comes Swiper, a much nicer search system than the default.
 (define-key evil-normal-state-map "/" 'swiper)
 )
 #+END_SRC
-** Magit - Git interface
+** Project management
+*** Magit - Git interface
    #+BEGIN_SRC emacs-lisp
    (use-package magit)
    #+END_SRC
+*** Projectile
+#+BEGIN_SRC emacs-lisp
+(use-package projectile
+:diminish projectile-mode
+:config
+(projectile-mode 1)
+(define-key evil-normal-state-map (kbd "C-p") 'projectile-command-map))
+#+END_SRC
+
+*** E-TAGS!
+#+BEGIN_SRC emacs-lisp
+(use-package counsel-etags
+  :init
+  (add-hook 'prog-mode-hook
+  (lambda ()
+  (add-hook 'after-save-hook
+  'counsel-etags-virtual-update-tags 'append 'local)))
+  :config
+  (define-key evil-normal-state-map (kbd "C-]") 'counsel-etags-find-tag-at-point)
+  (setq counsel-etags-update-interval 60)
+  (push "build" counsel-etags-ignore-directories))
+  #+END_SRC
 ** GUI configuration
+*** Window management
 Removing unneccessary clutter from the GUI.
 #+BEGIN_SRC emacs-lisp
 (menu-bar-mode -1)
 (toggle-scroll-bar -1)
 (tool-bar-mode -1)
 #+END_SRC
-   
+
+Install an icons pack
+#+BEGIN_SRC emacs-lisp
+(use-package all-the-icons)
+#+END_SRC
+
+Set up a start screen
+#+BEGIN_SRC emacs-lisp
+(use-package page-break-lines
+:diminish page-break-lines-mode)
+(use-package dashboard
+:diminish dashboard-mode
+:init
+(setq dashboard-set-heading-icons t)
+(setq dashboard-footer "Emacs is pretty cool")
+(setq dashboard-set-file-icons t)
+(setq dashboard-items '((recents . 5)
+                        (projects . 5)
+                        (bookmarks . 5)))
+:config
+(dashboard-setup-startup-hook))
+#+END_SRC
+
+Work with multiple windows.
+#+BEGIN_SRC emacs-lisp
+(use-package eyebrowse
+:diminish eyebrowse-mode
+:config (progn
+(define-key evil-normal-state-map (kbd "M-1") 'eyebrowse-switch-to-window-config-1)
+(define-key evil-normal-state-map (kbd "M-2") 'eyebrowse-switch-to-window-config-2)
+(define-key evil-normal-state-map (kbd "M-3") 'eyebrowse-switch-to-window-config-3)
+(define-key evil-normal-state-map (kbd "M-4") 'eyebrowse-switch-to-window-config-4)
+(define-key evil-normal-state-map (kbd "M-r") 'eyebrowse-rename-window-config)
+(eyebrowse-mode 1)
+(setq eyebrowse-new-workspace t)))
+#+END_SRC
+
 *** Colorscheme
 Defaulting here to doom-one, as inspired by Atom.
 #+BEGIN_SRC emacs-lisp
@@ -140,6 +218,26 @@ Defaulting here to doom-one, as inspired by Atom.
 (load-theme 'doom-one t))
 #+END_SRC
 
+** File management
+#+BEGIN_SRC emacs-lisp
+(use-package neotree
+:init
+(setq neo-smart-open t)
+(setq neo-theme (if (display-graphic-p) 'icons 'arrow))
+:config
+    (global-set-key [f8] 'neotree-toggle)
+    (add-hook 'neotree-mode-hook
+    (lambda ()
+        (evil-define-key 'normal neotree-mode-map (kbd "TAB") 'neotree-enter)
+        (evil-define-key 'normal neotree-mode-map (kbd "SPC") 'neotree-quick-look)
+        (evil-define-key 'normal neotree-mode-map (kbd "q") 'neotree-hide)
+        (evil-define-key 'normal neotree-mode-map (kbd "RET") 'neotree-enter)
+        (evil-define-key 'normal neotree-mode-map (kbd "g") 'neotree-refresh)
+        (evil-define-key 'normal neotree-mode-map (kbd "n") 'neotree-next-line)
+        (evil-define-key 'normal neotree-mode-map (kbd "p") 'neotree-previous-line)
+        (evil-define-key 'normal neotree-mode-map (kbd "A") 'neotree-stretch-toggle)
+        (evil-define-key 'normal neotree-mode-map (kbd "H") 'neotree-hidden-file-toggle))))
+#+END_SRC
 ** Org mode!
 #+BEGIN_SRC emacs-lisp
 (setq org-startup-indented 1)
@@ -151,4 +249,18 @@ Defaulting here to doom-one, as inspired by Atom.
 (fset 'yes-or-no-p 'y-or-n-p)
 ;; Disable that annoying bell
 (setq ring-bell-function 'ignore)
+;; Show the time
+(display-time-mode 1)
+#+END_SRC
+
+Remove trailing whitespace upon save
+#+BEGIN_SRC emacs-lisp
+(use-package whitespace
+:ensure nil
+:hook (before-save . whitespace-cleanup))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(use-package emacs
+:diminish auto-revert-mode)
 #+END_SRC
