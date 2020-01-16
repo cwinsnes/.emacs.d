@@ -218,6 +218,14 @@ Defaulting here to doom-one, as inspired by Atom.
 (load-theme 'doom-one t))
 #+END_SRC
 
+Use rainbow parenthesis and such
+#+BEGIN_SRC emacs-lisp
+(use-package rainbow-delimiters
+:diminish rainbow-delimiters-mode
+:config
+(add-hook 'prog-mode-hook (rainbow-delimiters-mode 1)))
+#+END_SRC
+
 ** File management
 #+BEGIN_SRC emacs-lisp
 (use-package neotree
