@@ -1,5 +1,5 @@
 * Instructions
-This org file should be loaded as part of initialization for Emacs 26+.
+This org file dshould be loaded as part of initialization for Emacs 26+.
 Use org-babel-load-file to load the file.
 
 Essentially, the file should be loaded from your init.el using
@@ -12,7 +12,7 @@ Essentially, the file should be loaded from your init.el using
 
 (package-installed-p 'use-package)
 (package-refresh-contents)
-(package-install 'use-package))
+(package-install 'use-package)
 
 (org-babel-load-file (expand-file-name "~/.emacs.d/emacsinit.org"))
 #+END_EXAMPLE
@@ -51,12 +51,18 @@ packages might set evil mode keys to their commands.
 :init
 (setq evil-want-C-u-scroll t)
 (setq evil-search-module 'evil-search)
+(setq evil-want-keybinding nil)
 :config
 (evil-mode 1)
 (define-key evil-normal-state-map (kbd "C-f") 'find-file))
 
 (use-package evil-org
 :after evil)
+
+(use-package evil-collection
+:after evil
+:config
+(evil-collection-init))
 
 (use-package evil-magit
 :after evil)
@@ -134,8 +140,7 @@ With Ivy comes Swiper, a much nicer search system than the default.
 :init
 (setq ivy-display-style 'fancy)
 :config
-(define-key evil-normal-state-map "/" 'swiper)
-)
+(define-key evil-normal-state-map "/" 'swiper-isearch))
 #+END_SRC
 ** Project management
 *** Magit - Git interface
@@ -160,7 +165,6 @@ With Ivy comes Swiper, a much nicer search system than the default.
   (add-hook 'after-save-hook
   'counsel-etags-virtual-update-tags 'append 'local)))
   :config
-  (define-key evil-normal-state-map (kbd "C-]") 'counsel-etags-find-tag-at-point)
   (setq counsel-etags-update-interval 60)
   (push "build" counsel-etags-ignore-directories))
   #+END_SRC
@@ -200,10 +204,16 @@ Work with multiple windows.
 (use-package eyebrowse
 :diminish eyebrowse-mode
 :config (progn
+(define-key evil-normal-state-map (kbd "M-0") 'eyebrowse-switch-to-window-config-0)
 (define-key evil-normal-state-map (kbd "M-1") 'eyebrowse-switch-to-window-config-1)
 (define-key evil-normal-state-map (kbd "M-2") 'eyebrowse-switch-to-window-config-2)
 (define-key evil-normal-state-map (kbd "M-3") 'eyebrowse-switch-to-window-config-3)
 (define-key evil-normal-state-map (kbd "M-4") 'eyebrowse-switch-to-window-config-4)
+(define-key evil-normal-state-map (kbd "M-5") 'eyebrowse-switch-to-window-config-5)
+(define-key evil-normal-state-map (kbd "M-6") 'eyebrowse-switch-to-window-config-6)
+(define-key evil-normal-state-map (kbd "M-7") 'eyebrowse-switch-to-window-config-7)
+(define-key evil-normal-state-map (kbd "M-8") 'eyebrowse-switch-to-window-config-8)
+(define-key evil-normal-state-map (kbd "M-9") 'eyebrowse-switch-to-window-config-9)
 (define-key evil-normal-state-map (kbd "M-r") 'eyebrowse-rename-window-config)
 (eyebrowse-mode 1)
 (setq eyebrowse-new-workspace t)))
@@ -223,10 +233,16 @@ Use rainbow parenthesis and such
 (use-package rainbow-delimiters
 :diminish rainbow-delimiters-mode
 :config
-(add-hook 'prog-mode-hook (rainbow-delimiters-mode 1)))
+(add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 #+END_SRC
 
+*** Modeline
+#+BEGIN_SRC emacs-lisp
+(use-package doom-modeline
+:hook (after-init . doom-modeline-mode))
+#+END_SRC
 ** File management
+Directory management
 #+BEGIN_SRC emacs-lisp
 (use-package neotree
 :init
@@ -246,9 +262,37 @@ Use rainbow parenthesis and such
         (evil-define-key 'normal neotree-mode-map (kbd "A") 'neotree-stretch-toggle)
         (evil-define-key 'normal neotree-mode-map (kbd "H") 'neotree-hidden-file-toggle))))
 #+END_SRC
+
+*** Autocompleting
+#+BEGIN_SRC emacs-lisp
+(global-set-key "\M-/" 'comint-dynamic-complete-filename)
+#+END_SRC
+
+*** File finding
+The FZF package requires there to be a =fzf= executable somewhere in your =$PATH= to work properly.
+#+BEGIN_SRC emacs-lisp
+(use-package fzf
+:config
+(define-key evil-normal-state-map (kbd "M-f") 'fzf))
+#+END_SRC
+*** PDF modes
+#+BEGIN_SRC emacs-lisp
+(add-hook 'doc-view-mode-hook 'auto-revert-mode)
+#+END_SRC
+** Programming languages
+*** Python
+#+BEGIN_SRC emacs-lisp
+(setq python-shell-interpreter "ipython3"
+      python-shell-interpreter-args "-i --simple-prompt")
+(use-package elpy
+:init
+(setq elpy-shell-starting-directory 'current-directory)
+(elpy-enable))
+#+END_SRC
 ** Org mode!
 #+BEGIN_SRC emacs-lisp
 (setq org-startup-indented 1)
+(add-hook 'org-mode-hook #'visual-line-mode)
 #+END_SRC
 
 ** General emacs configuration
