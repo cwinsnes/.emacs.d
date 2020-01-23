@@ -215,6 +215,7 @@ Work with multiple windows.
 (define-key evil-normal-state-map (kbd "M-8") 'eyebrowse-switch-to-window-config-8)
 (define-key evil-normal-state-map (kbd "M-9") 'eyebrowse-switch-to-window-config-9)
 (define-key evil-normal-state-map (kbd "M-r") 'eyebrowse-rename-window-config)
+(define-key evil-normal-state-map (kbd "M-w") 'eyebrowse-close-window-config)
 (eyebrowse-mode 1)
 (setq eyebrowse-new-workspace t)))
 #+END_SRC
