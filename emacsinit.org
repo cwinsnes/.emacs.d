@@ -157,13 +157,18 @@ With Ivy comes Swiper, a much nicer search system than the default.
 #+END_SRC
 
 *** E-TAGS!
+This project requires counsel to be installed.
 #+BEGIN_SRC emacs-lisp
 (use-package counsel-etags
+  :bind (("C-]" . counsel-etags-find-tag-at-point))
   :init
+  (setq tags-revert-without-query t)
+  (setq tags-add-tables nil)
+  (setq large-file-warning-threshold nil)
   (add-hook 'prog-mode-hook
-  (lambda ()
-  (add-hook 'after-save-hook
-  'counsel-etags-virtual-update-tags 'append 'local)))
+    (lambda ()
+        (add-hook 'after-save-hook
+                  'counsel-etags-virtual-update-tags 'append 'local)))
   :config
   (setq counsel-etags-update-interval 60)
   (push "build" counsel-etags-ignore-directories))
@@ -219,7 +224,10 @@ Work with multiple windows.
 (eyebrowse-mode 1)
 (setq eyebrowse-new-workspace t)))
 #+END_SRC
-
+*** Text
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-10"))
+#+END_SRC
 *** Colorscheme
 Defaulting here to doom-one, as inspired by Atom.
 #+BEGIN_SRC emacs-lisp
