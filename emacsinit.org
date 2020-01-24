@@ -45,6 +45,7 @@ Use Vim key bindings by default. Do note that some of the other
 packages might set evil mode keys to their commands.
 
 #+BEGIN_SRC emacs-lisp
+
 (use-package evil
 :diminish evil-mode
 :diminish undo-tree-mode
@@ -52,9 +53,6 @@ packages might set evil mode keys to their commands.
 (setq evil-want-C-u-scroll t)
 (setq evil-search-module 'evil-search)
 (setq evil-want-keybinding nil)
-:config
-(evil-mode 1)
-(define-key evil-normal-state-map (kbd "C-f") 'find-file))
 
 (use-package evil-org
 :after evil)
@@ -66,6 +64,19 @@ packages might set evil mode keys to their commands.
 
 (use-package evil-magit
 :after evil)
+
+;; Evil leader has to be loaded before Evil to work in initial buffers.
+(use-package evil-leader)
+
+(define-key evil-normal-state-map (kbd "C-f") 'find-file))
+(evil-leader/set-leader "<SPC>")
+(evil-leader/set-key
+    "w" 'save-buffer
+    "f" 'find-file
+    "g" 'magit-status)
+
+(global-evil-leader-mode)
+(evil-mode 1)
 #+END_SRC
 
 ** Ivy - completion front-end
