@@ -73,7 +73,8 @@ packages might set evil mode keys to their commands.
 (evil-leader/set-key
     "w" 'save-buffer
     "f" 'find-file
-    "g" 'magit-status)
+    "g" 'magit-status
+    "b" 'evil-switch-to-windows-last-buffer)
 
 (global-evil-leader-mode)
 (evil-mode 1)
