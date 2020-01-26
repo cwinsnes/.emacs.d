@@ -181,6 +181,7 @@ This project requires counsel to be installed.
         (add-hook 'after-save-hook
                   'counsel-etags-virtual-update-tags 'append 'local)))
   :config
+  (define-key evil-normal-state-map (kbd "C-]") 'counsel-etags-find-tag-at-point)
   (setq counsel-etags-update-interval 60)
   (push "build" counsel-etags-ignore-directories))
   #+END_SRC
@@ -308,6 +309,23 @@ The FZF package requires there to be a =fzf= executable somewhere in your =$PATH
 :init
 (setq elpy-shell-starting-directory 'current-directory)
 (elpy-enable))
+#+END_SRC
+*** C
+#+BEGIN_SRC emacs-lisp
+(defun infer-indentation-style ()
+  ;; if our source file uses tabs, we use tabs, if spaces spaces, and if
+  ;; neither, we use the current indent-tabs-mode
+  (let ((space-count (how-many "^  " (point-min) (point-max)))
+        (tab-count (how-many "^\t" (point-min) (point-max))))
+    (if (> space-count tab-count) (setq indent-tabs-mode nil))
+    (if (> tab-count space-count) (setq indent-tabs-mode t))))
+
+
+(setq c-default-style "linux"
+          c-basic-offset 2)
+(add-hook 'c-mode-hook (lambda ()
+    (setq indent-tabs-mode nil)
+    (infer-indentation-style)))
 #+END_SRC
 ** Org mode!
 #+BEGIN_SRC emacs-lisp
