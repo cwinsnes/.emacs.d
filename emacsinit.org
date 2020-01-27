@@ -348,7 +348,7 @@ The FZF package requires there to be a =fzf= executable somewhere in your =$PATH
   "Remove headlines with :no_title: tag."
   (org-map-entries (lambda () (delete-region (point-at-bol) (point-at-eol)))
                    "no_title"))
-
+(setq org-image-actual-width nil)
 (add-hook 'org-export-before-processing-hook #'org-remove-headlines)
 #+END_SRC
 
@@ -375,7 +375,9 @@ Note that we are also using ivy-bibtex, for completions and such.
 *** Presentations
 #+BEGIN_SRC emacs-lisp
 (use-package visual-fill-column)
-(use-package writeroom-mode)
+(use-package writeroom-mode
+:init
+(setq writeroom-width 200))
 
 (use-package org-present)
 
