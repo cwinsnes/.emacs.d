@@ -76,6 +76,10 @@ packages might set evil mode keys to their commands.
     "g" 'magit-status
     "b" 'evil-switch-to-windows-last-buffer)
 
+(with-eval-after-load 'evil-maps
+  (define-key evil-normal-state-map (kbd "C-n") nil)
+  (define-key evil-normal-state-map (kbd "C-p") nil))
+
 (global-evil-leader-mode)
 (evil-mode 1)
 #+END_SRC
@@ -154,6 +158,7 @@ With Ivy comes Swiper, a much nicer search system than the default.
 :config
 (define-key evil-normal-state-map "/" 'swiper-isearch))
 #+END_SRC
+
 ** Project management
 *** Magit - Git interface
    #+BEGIN_SRC emacs-lisp
@@ -263,6 +268,11 @@ Use rainbow parenthesis and such
 (use-package doom-modeline
 :hook (after-init . doom-modeline-mode))
 #+END_SRC
+
+**** Hiding the modeline
+#+BEGIN_SRC emacs-lisp
+(use-package hide-mode-line)
+#+END_SRC
 ** File management
 Directory management
 #+BEGIN_SRC emacs-lisp
@@ -332,8 +342,73 @@ The FZF package requires there to be a =fzf= executable somewhere in your =$PATH
 #+BEGIN_SRC emacs-lisp
 (setq org-startup-indented 1)
 (add-hook 'org-mode-hook #'visual-line-mode)
+
+;; Allow for :no_title: to be used to ignore a heading in TOC
+(defun org-remove-headlines (backend)
+  "Remove headlines with :no_title: tag."
+  (org-map-entries (lambda () (delete-region (point-at-bol) (point-at-eol)))
+                   "no_title"))
+
+(add-hook 'org-export-before-processing-hook #'org-remove-headlines)
 #+END_SRC
 
+*** Citations
+This allows us to use easy referencing from within Org.
+Note that we are also using ivy-bibtex, for completions and such.
+#+BEGIN_SRC emacs-lisp
+(use-package org-ref
+:init
+(setq org-ref-completion-library 'org-ref-ivy-cite)
+(setq reftex-default-bibliography '("~/references/references.bib"))
+(setq org-ref-bibliography-notes "~/references/notes.org"
+      org-ref-default-bibliography '("~/references/references.bib")
+      org-ref-pdf-directory "~/references/pdfs/"))
+(setq bibtex-completion-bibliography "~/references/references.bib"
+      bibtex-completion-library-path "~/references/pdfs"
+      bibtex-completion-notes-path "~/references/notes")
+
+(setq  org-latex-pdf-process
+       '("latexmk -shell-escape -bibtex -pdf %f"))
+#+END_SRC
+
+
+*** Presentations
+#+BEGIN_SRC emacs-lisp
+(use-package visual-fill-column)
+(use-package writeroom-mode)
+
+(use-package org-present)
+
+(progn
+     (add-hook 'org-present-mode-hook
+               (lambda ()
+                 (writeroom-mode)
+                 (org-present-big)
+                 (org-display-inline-images)
+                 (org-present-hide-cursor)
+                 (org-present-read-only))
+                 (evil-force-normal-state))
+     (add-hook 'org-present-mode-quit-hook
+               (lambda ()
+                 (org-present-small)
+                 (org-remove-inline-images)
+                 (org-present-show-cursor)
+                 (org-present-read-write)
+                 (writeroom-mode -1))))
+
+(evil-ex-define-cmd "present" 'org-present)
+(evil-define-key 'normal org-mode-map (kbd "C-c C-p") 'org-present)
+(evil-define-key 'normal org-present-mode-keymap [right] 'org-present-next)
+(evil-define-key 'normal org-present-mode-keymap [left] 'org-present-prev)
+(evil-define-key 'normal org-present-mode-keymap (kbd "w") 'writeroom-mode)
+(evil-define-key 'normal org-present-mode-keymap (kbd "C-n") 'org-present-next)
+(evil-define-key 'normal org-present-mode-keymap (kbd "C-p") 'org-present-prev)
+(evil-define-key 'normal org-present-mode-keymap (kbd "C-c <") 'org-present-beginning)
+(evil-define-key 'normal org-present-mode-keymap (kbd "C-c >") 'org-present-end)
+(evil-define-key 'normal org-present-mode-keymap (kbd "C-c C-q") 'org-present-quit)
+(evil-define-key 'normal org-present-mode-keymap (kbd "C-+") 'org-present-big)
+(evil-define-key 'normal org-present-mode-keymap (kbd "C--") 'org-present-small)
+#+END_SRC
 ** General emacs configuration
 #+BEGIN_SRC emacs-lisp
 ;; Allow for using just y or n instead of writing yes/no.
@@ -342,6 +417,7 @@ The FZF package requires there to be a =fzf= executable somewhere in your =$PATH
 (setq ring-bell-function 'ignore)
 ;; Show the time
 (display-time-mode 1)
+(blink-cursor-mode -1)
 #+END_SRC
 
 Remove trailing whitespace upon save
