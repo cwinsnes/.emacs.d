@@ -306,6 +306,7 @@ Directory management
 *** Autocompleting
 #+BEGIN_SRC emacs-lisp
 (global-set-key "\M-/" 'comint-dynamic-complete-filename)
+(define-key evil-insert-state-map (kbd "C-/") 'hippie-expand)
 #+END_SRC
 
 *** File finding
@@ -346,6 +347,23 @@ The FZF package requires there to be a =fzf= executable somewhere in your =$PATH
     (setq indent-tabs-mode nil)
     (infer-indentation-style)))
 #+END_SRC
+** Programming in general
+*** Snippets
+#+BEGIN_SRC emacs-lisp
+(use-package yasnippet
+:config
+(yas-global-mode 1))
+(use-package yasnippet-snippets)
+#+END_SRC
+*** Error checking - Flycheck
+#+BEGIN_SRC emacs-lisp
+(use-package flycheck
+:config
+(add-hook 'after-init-hook #'global-flycheck-mode)
+(define-key evil-normal-state-map (kbd "C-c C-p") 'flycheck-previous-error)
+(define-key evil-normal-state-map (kbd "C-c C-n") 'flycheck-next-error))
+#+END_SRC
+
 ** Org mode!
 #+BEGIN_SRC emacs-lisp
 (setq org-startup-indented 1)
