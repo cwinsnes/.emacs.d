@@ -273,6 +273,14 @@ Use rainbow parenthesis and such
 #+BEGIN_SRC emacs-lisp
 (use-package hide-mode-line)
 #+END_SRC
+*** Writeroom mode
+#+BEGIN_SRC emacs-lisp
+(use-package visual-fill-column)
+(use-package writeroom-mode
+:init
+(setq writeroom-width 200))
+#+END_SRC
+
 ** File management
 Directory management
 #+BEGIN_SRC emacs-lisp
@@ -348,17 +356,15 @@ The FZF package requires there to be a =fzf= executable somewhere in your =$PATH
   "Remove headlines with :no_title: tag."
   (org-map-entries (lambda () (delete-region (point-at-bol) (point-at-eol)))
                    "no_title"))
-(setq org-image-actual-width nil)
+(setq org-image-actual-width '(400))
 (add-hook 'org-export-before-processing-hook #'org-remove-headlines)
 #+END_SRC
 
 *** Citations
 This allows us to use easy referencing from within Org.
-Note that we are also using ivy-bibtex, for completions and such.
 #+BEGIN_SRC emacs-lisp
 (use-package org-ref
 :init
-(setq org-ref-completion-library 'org-ref-ivy-cite)
 (setq reftex-default-bibliography '("~/references/references.bib"))
 (setq org-ref-bibliography-notes "~/references/notes.org"
       org-ref-default-bibliography '("~/references/references.bib")
@@ -374,42 +380,32 @@ Note that we are also using ivy-bibtex, for completions and such.
 
 *** Presentations
 #+BEGIN_SRC emacs-lisp
-(use-package visual-fill-column)
-(use-package writeroom-mode
-:init
-(setq writeroom-width 200))
+(use-package epresent
+:config
+(add-hook 'epresent-start-presentation-hook (lambda () (org-display-inline-images))))
+(evil-ex-define-cmd "present" 'epresent-run)
+;; The names of scroll down and scroll up is stupidly switched for some reason
+(evil-define-key 'normal epresent-mode-map [up] 'scroll-down)
+(evil-define-key 'normal epresent-mode-map "k" 'scroll-down)
 
-(use-package org-present)
+(evil-define-key 'normal epresent-mode-map [down] 'scroll-up)
+(evil-define-key 'normal epresent-mode-map "j" 'scroll-up)
 
-(progn
-     (add-hook 'org-present-mode-hook
-               (lambda ()
-                 (writeroom-mode)
-                 (org-present-big)
-                 (org-display-inline-images)
-                 (org-present-hide-cursor)
-                 (org-present-read-only))
-                 (evil-force-normal-state))
-     (add-hook 'org-present-mode-quit-hook
-               (lambda ()
-                 (org-present-small)
-                 (org-remove-inline-images)
-                 (org-present-show-cursor)
-                 (org-present-read-write)
-                 (writeroom-mode -1))))
+(evil-define-key 'normal epresent-mode-map [left] 'epresent-previous-page)
+(evil-define-key 'normal epresent-mode-map [prior] 'epresent-previous-page)
+(evil-define-key 'normal epresent-mode-map "p" 'epresent-previous-page)
 
-(evil-ex-define-cmd "present" 'org-present)
-(evil-define-key 'normal org-mode-map (kbd "C-c C-p") 'org-present)
-(evil-define-key 'normal org-present-mode-keymap [right] 'org-present-next)
-(evil-define-key 'normal org-present-mode-keymap [left] 'org-present-prev)
-(evil-define-key 'normal org-present-mode-keymap (kbd "w") 'writeroom-mode)
-(evil-define-key 'normal org-present-mode-keymap (kbd "C-n") 'org-present-next)
-(evil-define-key 'normal org-present-mode-keymap (kbd "C-p") 'org-present-prev)
-(evil-define-key 'normal org-present-mode-keymap (kbd "C-c <") 'org-present-beginning)
-(evil-define-key 'normal org-present-mode-keymap (kbd "C-c >") 'org-present-end)
-(evil-define-key 'normal org-present-mode-keymap (kbd "C-c C-q") 'org-present-quit)
-(evil-define-key 'normal org-present-mode-keymap (kbd "C-+") 'org-present-big)
-(evil-define-key 'normal org-present-mode-keymap (kbd "C--") 'org-present-small)
+(evil-define-key 'normal epresent-mode-map [right] 'epresent-next-page)
+(evil-define-key 'normal epresent-mode-map [next] 'epresent-next-page)
+(evil-define-key 'normal epresent-mode-map "n" 'epresent-next-page)
+
+(evil-define-key 'normal epresent-mode-map [f5] 'epresent-edit-text) ; Another [f5] exits edit mode.
+(evil-define-key 'normal epresent-mode-map "s" 'epresent-toggle-hide-src-blocks)
+(evil-define-key 'normal epresent-mode-map "S" 'epresent-toggle-hide-src-block)
+
+(evil-define-key 'normal epresent-mode-map "v" 'epresent-jump-to-page)
+
+(evil-define-key 'normal epresent-mode-map "q" 'epresent-quit)
 #+END_SRC
 ** General emacs configuration
 #+BEGIN_SRC emacs-lisp
