@@ -387,13 +387,31 @@ The FZF package requires there to be a =fzf= executable somewhere in your =$PATH
 (setq org-startup-indented 1)
 (add-hook 'org-mode-hook #'visual-line-mode)
 
-;; Allow for :no_title: to be used to ignore a heading in TOC
+;; Allow for :no_title: to be used to ignore a heading for latex export
 (defun org-remove-headlines (backend)
   "Remove headlines with :no_title: tag."
   (org-map-entries (lambda () (delete-region (point-at-bol) (point-at-eol)))
                    "no_title"))
+
+;; Allow the use of :new_page: to force a new page before the heading in a latex export
+(defun org-newpage-headlines (backend)
+  "Add a latex newline to headings with :new_page: tag"
+  (org-map-entries (lambda ()
+      (beginning-of-line)
+      (insert "#+LATEX: \\newpage\n")
+      (let (
+            (p1 (point-at-bol))
+            (p2 (point-at-eol)))
+          (save-restriction
+              (narrow-to-region p1 p2)
+              (goto-char (point-min))
+              (while (search-forward ":new_page:" nil t)
+                   (replace-match "" nil t)))))
+  "new_page"))
+
 (setq org-image-actual-width '(400))
 (add-hook 'org-export-before-processing-hook #'org-remove-headlines)
+(add-hook 'org-export-before-processing-hook #'org-newpage-headlines)
 
 (use-package org-bullets)
 (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
