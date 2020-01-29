@@ -74,6 +74,8 @@ packages might set evil mode keys to their commands.
     "w" 'save-buffer
     "f" 'find-file
     "g" 'magit-status
+    "a" 'ace-jump-mode
+    "h" 'evil-ex-nohighlight
     "b" 'evil-switch-to-windows-last-buffer)
 
 (with-eval-after-load 'evil-maps
@@ -266,7 +268,11 @@ Use rainbow parenthesis and such
 *** Modeline
 #+BEGIN_SRC emacs-lisp
 (use-package doom-modeline
-:hook (after-init . doom-modeline-mode))
+:hook
+(after-init . doom-modeline-mode)
+:config
+(line-number-mode 1)
+(column-number-mode 1))
 #+END_SRC
 
 **** Hiding the modeline
@@ -348,6 +354,7 @@ The FZF package requires there to be a =fzf= executable somewhere in your =$PATH
     (infer-indentation-style)))
 #+END_SRC
 ** Programming in general
+
 *** Snippets
 #+BEGIN_SRC emacs-lisp
 (use-package yasnippet
@@ -363,7 +370,13 @@ The FZF package requires there to be a =fzf= executable somewhere in your =$PATH
 (define-key evil-normal-state-map (kbd "C-c C-p") 'flycheck-previous-error)
 (define-key evil-normal-state-map (kbd "C-c C-n") 'flycheck-next-error))
 #+END_SRC
-
+*** Jumping around (Ace-jump-mode)
+#+BEGIN_SRC emacs-lisp
+(use-package ace-jump-mode
+:config
+(setq ace-jump-mode-case-fold t)
+(setq ace-jump-mode-move-keys (loop for i from ?a to ?z collect i)))
+#+END_SRC
 ** Org mode!
 #+BEGIN_SRC emacs-lisp
 (setq org-startup-indented 1)
@@ -376,7 +389,11 @@ The FZF package requires there to be a =fzf= executable somewhere in your =$PATH
                    "no_title"))
 (setq org-image-actual-width '(400))
 (add-hook 'org-export-before-processing-hook #'org-remove-headlines)
+
+(use-package org-bullets)
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 #+END_SRC
+
 
 *** Citations
 This allows us to use easy referencing from within Org.
@@ -394,7 +411,6 @@ This allows us to use easy referencing from within Org.
 (setq  org-latex-pdf-process
        '("latexmk -shell-escape -bibtex -pdf %f"))
 #+END_SRC
-
 
 *** Presentations
 #+BEGIN_SRC emacs-lisp
