@@ -362,6 +362,11 @@ The FZF package requires there to be a =fzf= executable somewhere in your =$PATH
 (yas-global-mode 1))
 (use-package yasnippet-snippets)
 #+END_SRC
+*** Complete anything
+#+BEGIN_SRC emacs-lisp
+(use-package company)
+(add-hook 'after-init-hook 'global-company-mode)
+#+END_SRC
 *** Error checking - Flycheck
 #+BEGIN_SRC emacs-lisp
 (use-package flycheck
