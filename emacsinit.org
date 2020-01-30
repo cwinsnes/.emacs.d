@@ -374,6 +374,29 @@ The FZF package requires there to be a =fzf= executable somewhere in your =$PATH
 (add-hook 'after-init-hook #'global-flycheck-mode)
 (define-key evil-normal-state-map (kbd "C-c C-p") 'flycheck-previous-error)
 (define-key evil-normal-state-map (kbd "C-c C-n") 'flycheck-next-error))
+
+;; NOTE! This requires projectile to work
+(defun setup-flycheck-gcc-project-path ()
+  (let ((root (ignore-errors (projectile-project-root))))
+    (when root
+      (add-to-list
+       (make-variable-buffer-local 'flycheck-gcc-include-path)
+       root)
+
+      (add-to-list
+       (make-variable-buffer-local 'flycheck-clang-include-path)
+       root)
+
+      (add-to-list
+       (make-variable-buffer-local 'flycheck-gcc-include-path)
+       (concat root "/include")
+
+       (add-to-list
+       (make-variable-buffer-local 'flycheck-clang-include-path)
+       (concat root "/include"))))))
+
+(add-hook 'c-mode-hook 'setup-flycheck-gcc-project-path)
+(add-hook 'c++-mode-hook 'setup-flycheck-gcc-project-path)
 #+END_SRC
 *** Jumping around (Ace-jump-mode)
 #+BEGIN_SRC emacs-lisp
