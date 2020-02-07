@@ -410,6 +410,57 @@ The FZF package requires there to be a =fzf= executable somewhere in your =$PATH
 (setq org-startup-indented 1)
 (add-hook 'org-mode-hook #'visual-line-mode)
 
+(setq org-image-actual-width '(400))
+(add-hook 'org-export-before-processing-hook #'org-remove-headlines)
+(add-hook 'org-export-before-processing-hook #'org-newpage-headlines)
+
+(use-package org-bullets)
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+
+;; Babel languages
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((python . t)
+   (emacs-lisp . t)))
+#+END_SRC
+
+*** Org babel
+#+BEGIN_SRC emacs-lisp
+(setq org-babel-python-command "python3")
+#+END_SRC
+
+Make babel skip questions on whether to run code or not.
+#+BEGIN_SRC emacs-lisp
+(defun my-org-confirm-babel-evaluate (lang body)
+    "Don't confirm squat."
+    (not (member lang '("sh" "python" "elisp" "ruby" "shell" "dot" "perl"))))
+
+(setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(setq org-babel-default-header-args
+(cons '(:exports . "both")
+(assq-delete-all :exports org-babel-default-header-args)))
+
+(setq org-babel-default-header-args
+(cons '(:results . "output verbatim replace")
+(assq-delete-all :results org-babel-default-header-args)))
+#+END_SRC
+
+*** LaTeX export stuff
+#+BEGIN_SRC emacs-lisp
+(setq org-latex-listings 'minted)
+(setq org-latex-minted-options
+     '(("frame" "lines") ("linenos=true")))
+(require 'ox-latex)
+
+(add-to-list 'org-latex-packages-alist '("" "minted"))
+(add-to-list 'org-latex-packages-alist '("" "subcaption"))
+(add-to-list 'org-latex-packages-alist '("" "float"))
+(add-to-list 'org-latex-packages-alist '("" "graphicx"))
+(add-to-list 'org-latex-packages-alist '("" "xcolor"))
+
 ;; Allow for :no_title: to be used to ignore a heading for latex export
 (defun org-remove-headlines (backend)
   "Remove headlines with :no_title: tag."
@@ -431,15 +482,7 @@ The FZF package requires there to be a =fzf= executable somewhere in your =$PATH
               (while (search-forward ":new_page:" nil t)
                    (replace-match "" nil t)))))
   "new_page"))
-
-(setq org-image-actual-width '(400))
-(add-hook 'org-export-before-processing-hook #'org-remove-headlines)
-(add-hook 'org-export-before-processing-hook #'org-newpage-headlines)
-
-(use-package org-bullets)
-(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 #+END_SRC
-
 
 *** Citations
 This allows us to use easy referencing from within Org.
@@ -460,32 +503,31 @@ This allows us to use easy referencing from within Org.
 
 *** Presentations
 #+BEGIN_SRC emacs-lisp
-(use-package epresent
-:config
-(add-hook 'epresent-start-presentation-hook (lambda () (org-display-inline-images))))
-(evil-ex-define-cmd "present" 'epresent-run)
-;; The names of scroll down and scroll up is stupidly switched for some reason
-(evil-define-key 'normal epresent-mode-map [up] 'scroll-down)
-(evil-define-key 'normal epresent-mode-map "k" 'scroll-down)
-
-(evil-define-key 'normal epresent-mode-map [down] 'scroll-up)
-(evil-define-key 'normal epresent-mode-map "j" 'scroll-up)
-
-(evil-define-key 'normal epresent-mode-map [left] 'epresent-previous-page)
-(evil-define-key 'normal epresent-mode-map [prior] 'epresent-previous-page)
-(evil-define-key 'normal epresent-mode-map "p" 'epresent-previous-page)
-
-(evil-define-key 'normal epresent-mode-map [right] 'epresent-next-page)
-(evil-define-key 'normal epresent-mode-map [next] 'epresent-next-page)
-(evil-define-key 'normal epresent-mode-map "n" 'epresent-next-page)
-
-(evil-define-key 'normal epresent-mode-map [f5] 'epresent-edit-text) ; Another [f5] exits edit mode.
-(evil-define-key 'normal epresent-mode-map "s" 'epresent-toggle-hide-src-blocks)
-(evil-define-key 'normal epresent-mode-map "S" 'epresent-toggle-hide-src-block)
-
-(evil-define-key 'normal epresent-mode-map "v" 'epresent-jump-to-page)
-
-(evil-define-key 'normal epresent-mode-map "q" 'epresent-quit)
+;; (use-package epresent
+;; :config
+;; (add-hook 'epresent-start-presentation-hook (lambda () (org-display-inline-images))))
+;; (evil-ex-define-cmd "present" 'epresent-run)
+;; (evil-define-key 'normal epresent-mode-map [up] 'scroll-down)
+;; (evil-define-key 'normal epresent-mode-map "k" 'scroll-down)
+;;
+;; (evil-define-key 'normal epresent-mode-map [down] 'scroll-up)
+;; (evil-define-key 'normal epresent-mode-map "j" 'scroll-up)
+;;
+;; (evil-define-key 'normal epresent-mode-map [left] 'epresent-previous-page)
+;; (evil-define-key 'normal epresent-mode-map [prior] 'epresent-previous-page)
+;; (evil-define-key 'normal epresent-mode-map "p" 'epresent-previous-page)
+;;
+;; (evil-define-key 'normal epresent-mode-map [right] 'epresent-next-page)
+;; (evil-define-key 'normal epresent-mode-map [next] 'epresent-next-page)
+;; (evil-define-key 'normal epresent-mode-map "n" 'epresent-next-page)
+;;
+;; (evil-define-key 'normal epresent-mode-map [f5] 'epresent-edit-text) ; Another [f5] exits edit mode.
+;; (evil-define-key 'normal epresent-mode-map "s" 'epresent-toggle-hide-src-blocks)
+;; (evil-define-key 'normal epresent-mode-map "S" 'epresent-toggle-hide-src-block)
+;;
+;; (evil-define-key 'normal epresent-mode-map "v" 'epresent-jump-to-page)
+;;
+;; (evil-define-key 'normal epresent-mode-map "q" 'epresent-quit)
 #+END_SRC
 ** General emacs configuration
 #+BEGIN_SRC emacs-lisp
