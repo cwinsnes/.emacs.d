@@ -52,7 +52,7 @@ packages might set evil mode keys to their commands.
 :init
 (setq evil-want-C-u-scroll t)
 (setq evil-search-module 'evil-search)
-(setq evil-want-keybinding nil)
+(setq evil-want-keybinding nil))
 
 (use-package evil-org
 :after evil)
@@ -65,10 +65,13 @@ packages might set evil mode keys to their commands.
 (use-package evil-magit
 :after evil)
 
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
 ;; Evil leader has to be loaded before Evil to work in initial buffers.
 (use-package evil-leader)
 
-(define-key evil-normal-state-map (kbd "C-f") 'find-file))
+(define-key evil-normal-state-map (kbd "C-f") 'find-file)
 (evil-leader/set-leader "<SPC>")
 (evil-leader/set-key
     "w" 'save-buffer
@@ -76,6 +79,8 @@ packages might set evil mode keys to their commands.
     "g" 'magit-status
     "a" 'ace-jump-mode
     "h" 'evil-ex-nohighlight
+    "c" 'calendar
+    "l" 'org-journal-new-entry
     "b" 'evil-switch-to-windows-last-buffer)
 
 (with-eval-after-load 'evil-maps
@@ -353,6 +358,10 @@ The FZF package requires there to be a =fzf= executable somewhere in your =$PATH
     (setq indent-tabs-mode nil)
     (infer-indentation-style)))
 #+END_SRC
+*** Haskell
+#+BEGIN_SRC emacs-lisp
+(use-package haskell-mode)
+#+END_SRC
 ** Programming in general
 
 *** Snippets
@@ -416,6 +425,7 @@ The FZF package requires there to be a =fzf= executable somewhere in your =$PATH
 
 (use-package org-bullets)
 (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+(setq org-export-in-background t)
 
 ;; Babel languages
 (org-babel-do-load-languages
@@ -528,6 +538,21 @@ This allows us to use easy referencing from within Org.
 ;; (evil-define-key 'normal epresent-mode-map "v" 'epresent-jump-to-page)
 ;;
 ;; (evil-define-key 'normal epresent-mode-map "q" 'epresent-quit)
+#+END_SRC
+
+*** Org journal
+#+BEGIN_SRC emacs-lisp
+(use-package org-journal)
+#+END_SRC
+** Calendar mode!
+Making sure that calendar mode works well with evil and =org-journal=!
+#+BEGIN_SRC emacs-lisp
+  (use-package calendar
+  :config
+  (evil-define-key 'normal calendar-mode-map "]" 'org-journal-next-entry)
+  (evil-define-key 'normal calendar-mode-map "[" 'org-journal-previous-entry)
+  (evil-define-key 'normal calendar-mode-map (kbd "S-<return>") 'org-journal-read-entry)
+  (evil-define-key 'normal calendar-mode-map (kbd "RET") 'org-journal-display-entry))
 #+END_SRC
 ** General emacs configuration
 #+BEGIN_SRC emacs-lisp
