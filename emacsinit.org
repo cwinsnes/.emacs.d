@@ -470,6 +470,7 @@ Make babel skip questions on whether to run code or not.
 (add-to-list 'org-latex-packages-alist '("" "float"))
 (add-to-list 'org-latex-packages-alist '("" "graphicx"))
 (add-to-list 'org-latex-packages-alist '("" "xcolor"))
+(add-to-list 'org-latex-packages-alist '("" "parskip"))
 
 ;; Allow for :no_title: to be used to ignore a heading for latex export
 (defun org-remove-headlines (backend)
