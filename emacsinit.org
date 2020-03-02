@@ -293,7 +293,7 @@ Use rainbow parenthesis and such
 #+END_SRC
 
 ** File management
-Directory management
+*** Directory management
 #+BEGIN_SRC emacs-lisp
 (use-package neotree
 :init
@@ -314,6 +314,40 @@ Directory management
         (evil-define-key 'normal neotree-mode-map (kbd "H") 'neotree-hidden-file-toggle))))
 #+END_SRC
 
+
+*** DIRED
+Creates a function for creating a new file in DIRED.
+#+BEGIN_SRC emacs-lisp
+(eval-after-load 'dired
+  '(progn
+     (defun my-dired-create-file (file)
+       "Create a file called FILE.
+       If FILE already exists, signal an error."
+       (interactive
+        (list (read-file-name "Create file: " (dired-current-directory))))
+       (let* ((expanded (expand-file-name file))
+              (try expanded)
+              (dir (directory-file-name (file-name-directory expanded)))
+              new)
+         (if (file-exists-p expanded)
+             (error "Cannot create file %s: file exists" expanded))
+         ;; Find the topmost nonexistent parent dir (variable `new')
+         (while (and try (not (file-exists-p try)) (not (equal new try)))
+           (setq new try
+                 try (directory-file-name (file-name-directory try))))
+         (when (not (file-exists-p dir))
+           (make-directory dir t))
+         (write-region "" nil expanded t)
+         (when new
+           (dired-add-file new)
+           (dired-move-to-filename))))))
+#+END_SRC
+
+Bind it to '_' to make it right next to '+' which is the command for new directory.
+#+BEGIN_SRC emacs-lisp
+(define-key dired-mode-map (kbd "_") 'my-dired-create-file)
+(evil-define-key 'normal dired-mode-map (kbd "_") 'my-dired-create-file)
+#+END_SRC
 *** Autocompleting
 #+BEGIN_SRC emacs-lisp
 (global-set-key "\M-/" 'comint-dynamic-complete-filename)
@@ -331,6 +365,7 @@ The FZF package requires there to be a =fzf= executable somewhere in your =$PATH
 #+BEGIN_SRC emacs-lisp
 (add-hook 'doc-view-mode-hook 'auto-revert-mode)
 #+END_SRC
+
 ** Programming languages
 *** Python
 #+BEGIN_SRC emacs-lisp
