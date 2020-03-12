@@ -599,6 +599,8 @@ Making sure that calendar mode works well with evil and =org-journal=!
 ;; Show the time
 (display-time-mode 1)
 (blink-cursor-mode -1)
+;; Enable emacs server
+(server-start)
 #+END_SRC
 
 Remove trailing whitespace upon save
