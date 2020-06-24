@@ -67,6 +67,13 @@ Remove trailing whitespace upon save
     (global-auto-revert-mode)
     (diminish 'auto-revert-mode))
 #+END_SRC
+*** Ivy
+Enables completion in the mini buffers
+#+begin_src emacs-lisp
+  (use-package ivy
+    :config
+    (ivy-mode 1))
+#+end_src
 ** evil-mode - Vim key bindings
 Start by unbinding keys that might interfere later.
 #+BEGIN_SRC emacs-lisp
@@ -107,11 +114,8 @@ Add a leader key to evil, and set its bindings.
     "w" 'save-buffer
     "f" 'find-file
     "g" 'magit-status
-    "a" 'ace-jump-mode
     "h" 'evil-ex-nohighlight
-    "c" 'calendar
-    "l" 'org-journal-new-entry
-    "b" 'evil-switch-to-windows-last-buffer)
+    "b" 'ivy-switch-buffer)
 
   (with-eval-after-load 'evil-maps
     (define-key evil-normal-state-map (kbd "C-n") nil)
@@ -160,6 +164,7 @@ Make sure that org mode starts in indent mode by default.
 Org-roam allows for backlinking notes.
 #+BEGIN_SRC emacs-lisp
   (use-package org-roam
+    :diminish org-roam-mode
     :hook
     (after-init . org-roam-mode)
     :custom
@@ -195,8 +200,10 @@ Completion engine for several languages
       :diminish company-mode
       :config
       (add-hook 'after-init-hook 'global-company-mode)
-      (setq company-dabbrev-downcase 0)
-      (setq company-idle-delay 0))
+      (setq company-minimum-prefix-length 1
+            company-dabbrev-downcase 0
+            company-idle-delay 0)
+      (company-tng-configure-default))
 #+END_SRC
 ** Graphical configuration
 Make sure all-the-icons is installed.
@@ -227,3 +234,11 @@ Use Doom emacs themes
 
     (doom-themes-org-config))
 #+END_SRC
+
+#+begin_src emacs-lisp
+  (use-package ivy-posframe
+    :diminish ivy-posframe-mode
+    :config
+    (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-point)))
+    (ivy-posframe-mode 1))
+#+end_src
