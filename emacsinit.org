@@ -46,6 +46,11 @@ Needs to be done here because it is used by use-package in configurations.
   (blink-cursor-mode -1)
   ;; Enable emacs server
   (server-start)
+
+  ;; Remove a bunch of visual noise from emacs
+  (menu-bar-mode -1)
+  (tool-bar-mode -1)
+  (scroll-bar-mode -1)
 #+END_SRC
 
 Remove trailing whitespace upon save
@@ -63,9 +68,13 @@ Remove trailing whitespace upon save
     (diminish 'auto-revert-mode))
 #+END_SRC
 ** evil-mode - Vim key bindings
+Start by unbinding keys that might interfere later.
+#+BEGIN_SRC emacs-lisp
+  (global-unset-key (kbd "C-w"))
+#+END_SRC
+
 Use Vim key bindings by default. Do note that some of the other
 packages might set evil mode keys to their commands.
-
 #+BEGIN_SRC emacs-lisp
   (use-package evil
     :diminish evil-mode
@@ -138,24 +147,47 @@ Make sure that org mode starts in indent mode by default.
     (add-hook 'org-mode-hook 'org-indent-mode)
     (eval-after-load 'org-indent '(diminish 'org-indent-mode)))
 #+END_SRC
+
+Org-roam allows for backlinking notes.
+#+BEGIN_SRC emacs-lisp
+  (use-package org-roam
+    :hook
+    (after-init . org-roam-mode)
+    :custom
+    (org-roam-directory "~/org/")
+    :bind (:map org-roam-mode-map
+                (("C-c n l" . org-roam)
+                 ("C-c n f" . org-roam-find-file)
+                 ("C-c n g" . org-roam-graph-show))
+                :map org-mode-map
+                (("C-c n i" . org-roam-insert))
+                (("C-c n I" . org-roam-insert-immediate))))
+
+  (setq org-roam-capture-templates
+        '(("d" "default" plain (function org-roam--capture-get-point)
+          "%?"
+          :file-name "%<%Y%m%d>-${slug}"
+          :head "#+title: ${title}\n#+roam_alias: ${title}\n#+roam_key: cite:${title}\n"
+          :unnarrowed t)))
+#+END_SRC
 ** General coding plugins
+*** LSP Mode
+Language server protocol. Works with company-mode!
+#+BEGIN_SRC emacs-lisp
+  (use-package lsp-mode
+    :diminish lsp-mode
+    :hook (prog-mode . lsp-deferred)
+    :commands (lsp lsp-deferred))
+#+END_SRC
 *** Company mode
 Completion engine for several languages
 #+BEGIN_SRC emacs-lisp
-  (use-package company
-    :diminish company-mode
-    :config
-    (add-hook 'after-init-hook 'global-company-mode))
-#+END_SRC
-
-Add python to supported company languages
-#+BEGIN_SRC emacs-lisp
-  (defun my/python-mode-hook ()
-    (add-to-list 'company-backends 'company-jedi))
-
-  (use-package company-jedi
-    :config
-    (add-hook 'python-mode-hook 'my/python-mode-hook))
+    (use-package company
+      :diminish company-mode
+      :config
+      (add-hook 'after-init-hook 'global-company-mode)
+      (setq company-dabbrev-downcase 0)
+      (setq company-idle-delay 0))
 #+END_SRC
 ** Graphical configuration
 Make sure all-the-icons is installed.
@@ -180,7 +212,7 @@ Use Doom emacs themes
     :config
     (setq doom-themes-enable-bold t
           doom-themes-enable-italic t)
-    (load-theme 'doom-city-lights t)
+    (load-theme 'doom-gruvbox t)
 
     (doom-themes-neotree-config)
 
