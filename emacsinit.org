@@ -23,57 +23,78 @@ We are going to be using use-package as a package manager and
 package configuration system. This has to be done first in the
 file!
 #+BEGIN_SRC emacs-lisp
-(eval-when-compile
-(require 'use-package)
-(setq use-package-always-ensure t))
+  (eval-when-compile
+    (require 'use-package)
+    (setq use-package-always-ensure t))
 #+END_SRC
 
-** Unset and hide items
+Add ability to diminish minor modes from list.
+Needs to be done here because it is used by use-package in configurations.
 #+BEGIN_SRC emacs-lisp
-(dotimes (n 10)
-  (global-unset-key (kbd (format "C-%d" n)))
-  (global-unset-key (kbd (format "M-%d" n)))
-  )
+  (use-package diminish)
+#+END_SRC
+
+** General emacs settings and plugins
+*** Basic settings
+#+BEGIN_SRC emacs-lisp
+  ;; Allow for using just y or n instead of writing yes/no.
+  (fset 'yes-or-no-p 'y-or-n-p)
+  ;; Disable that annoying bell
+  (setq ring-bell-function 'ignore)
+  ;; Show the time
+  (display-time-mode 1)
+  (blink-cursor-mode -1)
+  ;; Enable emacs server
+  (server-start)
+#+END_SRC
+
+Remove trailing whitespace upon save
+#+BEGIN_SRC emacs-lisp
+  (use-package whitespace
+    :ensure nil
+    :hook (before-save . whitespace-cleanup))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
-(use-package diminish)
+  (use-package emacs
+    :ensure nil
+    :config
+    (global-auto-revert-mode)
+    (diminish 'auto-revert-mode))
 #+END_SRC
-
 ** evil-mode - Vim key bindings
 Use Vim key bindings by default. Do note that some of the other
 packages might set evil mode keys to their commands.
 
 #+BEGIN_SRC emacs-lisp
+  (use-package evil
+    :diminish evil-mode
+    :diminish undo-tree-mode
+    :init
+    (setq evil-want-C-u-scroll t)
+    (setq evil-search-module 'evil-search)
+    (setq evil-want-keybinding nil))
 
-(use-package evil
-:diminish evil-mode
-:diminish undo-tree-mode
-:init
-(setq evil-want-C-u-scroll t)
-(setq evil-search-module 'evil-search)
-(setq evil-want-keybinding nil))
+  (use-package evil-org
+    :after evil)
 
-(use-package evil-org
-:after evil)
+  (use-package evil-collection
+    :after evil
+    :config
+    (evil-collection-init))
 
-(use-package evil-collection
-:after evil
-:config
-(evil-collection-init))
-
-(use-package evil-magit
-:after evil)
-
+  (use-package evil-magit
+    :after evil)
 #+END_SRC
 
+Add a leader key to evil, and set its bindings.
 #+BEGIN_SRC emacs-lisp
-;; Evil leader has to be loaded before Evil to work in initial buffers.
-(use-package evil-leader)
+  ;; Evil leader has to be loaded before Evil to work in initial buffers.
+  (use-package evil-leader)
 
-(define-key evil-normal-state-map (kbd "C-f") 'find-file)
-(evil-leader/set-leader "<SPC>")
-(evil-leader/set-key
+  (define-key evil-normal-state-map (kbd "C-f") 'find-file)
+  (evil-leader/set-leader "<SPC>")
+  (evil-leader/set-key
     "w" 'save-buffer
     "f" 'find-file
     "g" 'magit-status
@@ -83,534 +104,85 @@ packages might set evil mode keys to their commands.
     "l" 'org-journal-new-entry
     "b" 'evil-switch-to-windows-last-buffer)
 
-(with-eval-after-load 'evil-maps
-  (define-key evil-normal-state-map (kbd "C-n") nil)
-  (define-key evil-normal-state-map (kbd "C-p") nil))
+  (with-eval-after-load 'evil-maps
+    (define-key evil-normal-state-map (kbd "C-n") nil)
+    (define-key evil-normal-state-map (kbd "C-p") nil))
 
-(global-evil-leader-mode)
-(evil-mode 1)
-#+END_SRC
-
-** Ivy - completion front-end
-Use Ivy as the deafult completion engine for finding files and such.
-#+BEGIN_SRC emacs-lisp
-(use-package ivy
-:diminish ivy-mode
-:config
-(ivy-mode 1)
-(define-key ivy-minibuffer-map [escape] 'minibuffer-keyboard-quit)
-)
-#+END_SRC
-
-Use counsel and ivy rich to make for nicer interface to Ivy. Ivy-rich
-in particular gives a short preview of each command in the Ivy-list.
-#+BEGIN_SRC emacs-lisp
-(use-package counsel
-:diminish counsel-mode
-:after ivy
-:config
-(counsel-mode 1))
-
-(use-package ivy-rich
-  :after ivy
-  :init
-  (setq ivy-rich-display-transformers-list ; max column width sum = (ivy-poframe-width - 1)
-        '(ivy-switch-buffer
-          (:columns
-           ((ivy-rich-candidate (:width 35))
-            (ivy-rich-switch-buffer-project (:width 15 :face success))
-            (ivy-rich-switch-buffer-major-mode (:width 13 :face warning)))
-           :predicate
-           #'(lambda (cand) (get-buffer cand)))
-          counsel-M-x
-          (:columns
-           ((counsel-M-x-transformer (:width 35))
-            (ivy-rich-counsel-function-docstring (:width 34 :face font-lock-doc-face))))
-          counsel-describe-function
-          (:columns
-           ((counsel-describe-function-transformer (:width 35))
-            (ivy-rich-counsel-function-docstring (:width 34 :face font-lock-doc-face))))
-          counsel-describe-variable
-          (:columns
-           ((counsel-describe-variable-transformer (:width 35))
-            (ivy-rich-counsel-variable-docstring (:width 34 :face font-lock-doc-face))))
-          package-install
-          (:columns
-           ((ivy-rich-candidate (:width 25))
-            (ivy-rich-package-version (:width 12 :face font-lock-comment-face))
-            (ivy-rich-package-archive-summary (:width 7 :face font-lock-builtin-face))
-            (ivy-rich-package-install-summary (:width 23 :face font-lock-doc-face))))))
-  :config
-  (ivy-rich-mode +1)
-  (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
-#+END_SRC
-
-Use Ivy-posframe to make sure that the ivy interface shows up in a top
-center popup instead of the default bottom location.
-This package requires Emacs to be at least version 26.
-#+BEGIN_SRC emacs-lisp
-(use-package ivy-posframe
-:diminish ivy-posframe-mode
-:after ivy
-:config
-(setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-top-center)))
-(ivy-posframe-mode 1))
-#+END_SRC
-
-With Ivy comes Swiper, a much nicer search system than the default.
-#+BEGIN_SRC emacs-lisp
-(use-package swiper
-:init
-(setq ivy-display-style 'fancy)
-:config
-(define-key evil-normal-state-map "/" 'swiper-isearch))
-#+END_SRC
-
-** Project management
-*** Magit - Git interface
-   #+BEGIN_SRC emacs-lisp
-   (use-package magit)
-   #+END_SRC
-*** Projectile
-#+BEGIN_SRC emacs-lisp
-(use-package projectile
-:diminish projectile-mode
-:config
-(projectile-mode 1)
-(define-key evil-normal-state-map (kbd "C-p") 'projectile-command-map))
-#+END_SRC
-
-*** E-TAGS!
-This project requires counsel to be installed.
-#+BEGIN_SRC emacs-lisp
-(use-package counsel-etags
-  :bind (("C-]" . counsel-etags-find-tag-at-point))
-  :init
-  (setq tags-revert-without-query t)
-  (setq tags-add-tables nil)
-  (setq large-file-warning-threshold nil)
-  (add-hook 'prog-mode-hook
-    (lambda ()
-        (add-hook 'after-save-hook
-                  'counsel-etags-virtual-update-tags 'append 'local)))
-  :config
-  (define-key evil-normal-state-map (kbd "C-]") 'counsel-etags-find-tag-at-point)
-  (setq counsel-etags-update-interval 60)
-  (push "build" counsel-etags-ignore-directories))
-  #+END_SRC
-** GUI configuration
-*** Window management
-Removing unneccessary clutter from the GUI.
-#+BEGIN_SRC emacs-lisp
-(menu-bar-mode -1)
-(toggle-scroll-bar -1)
-(tool-bar-mode -1)
-#+END_SRC
-
-Install an icons pack
-#+BEGIN_SRC emacs-lisp
-(use-package all-the-icons)
-#+END_SRC
-
-Set up a start screen
-#+BEGIN_SRC emacs-lisp
-(use-package page-break-lines
-:diminish page-break-lines-mode)
-(use-package dashboard
-:diminish dashboard-mode
-:init
-(setq dashboard-set-heading-icons t)
-(setq dashboard-footer "Emacs is pretty cool")
-(setq dashboard-set-file-icons t)
-(setq dashboard-items '((recents . 5)
-                        (projects . 5)
-                        (bookmarks . 5)))
-:config
-(dashboard-setup-startup-hook))
-#+END_SRC
-
-Work with multiple windows.
-#+BEGIN_SRC emacs-lisp
-(use-package eyebrowse
-:diminish eyebrowse-mode
-:config (progn
-(define-key evil-normal-state-map (kbd "M-0") 'eyebrowse-switch-to-window-config-0)
-(define-key evil-normal-state-map (kbd "M-1") 'eyebrowse-switch-to-window-config-1)
-(define-key evil-normal-state-map (kbd "M-2") 'eyebrowse-switch-to-window-config-2)
-(define-key evil-normal-state-map (kbd "M-3") 'eyebrowse-switch-to-window-config-3)
-(define-key evil-normal-state-map (kbd "M-4") 'eyebrowse-switch-to-window-config-4)
-(define-key evil-normal-state-map (kbd "M-5") 'eyebrowse-switch-to-window-config-5)
-(define-key evil-normal-state-map (kbd "M-6") 'eyebrowse-switch-to-window-config-6)
-(define-key evil-normal-state-map (kbd "M-7") 'eyebrowse-switch-to-window-config-7)
-(define-key evil-normal-state-map (kbd "M-8") 'eyebrowse-switch-to-window-config-8)
-(define-key evil-normal-state-map (kbd "M-9") 'eyebrowse-switch-to-window-config-9)
-(define-key evil-normal-state-map (kbd "M-r") 'eyebrowse-rename-window-config)
-(define-key evil-normal-state-map (kbd "M-w") 'eyebrowse-close-window-config)
-(eyebrowse-mode 1)
-(setq eyebrowse-new-workspace t)))
-#+END_SRC
-*** Text
-#+BEGIN_SRC emacs-lisp
-(add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-10"))
-#+END_SRC
-*** Colorscheme
-Defaulting here to doom-one, as inspired by Atom.
-#+BEGIN_SRC emacs-lisp
-(use-package doom-themes
-:no-require t
-:config
-(load-theme 'doom-one t))
-#+END_SRC
-
-Use rainbow parenthesis and such
-#+BEGIN_SRC emacs-lisp
-(use-package rainbow-delimiters
-:diminish rainbow-delimiters-mode
-:config
-(add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
-#+END_SRC
-
-*** Modeline
-#+BEGIN_SRC emacs-lisp
-(use-package doom-modeline
-:hook
-(after-init . doom-modeline-mode)
-:config
-(line-number-mode 1)
-(column-number-mode 1))
-#+END_SRC
-
-**** Hiding the modeline
-#+BEGIN_SRC emacs-lisp
-(use-package hide-mode-line)
-#+END_SRC
-*** Writeroom mode
-#+BEGIN_SRC emacs-lisp
-(use-package visual-fill-column)
-(use-package writeroom-mode
-:init
-(setq writeroom-width 200))
+  (global-evil-leader-mode)
+  (evil-mode 1)
 #+END_SRC
 
 ** File management
-*** Directory management
+*** Neotree
+Add a file browser system to emacs.
+While it may not be used much it can be very handy sometimes.
 #+BEGIN_SRC emacs-lisp
-(use-package neotree
-:init
-(setq neo-smart-open t)
-(setq neo-theme (if (display-graphic-p) 'icons 'arrow))
-:config
-    (global-set-key [f8] 'neotree-toggle)
-    (add-hook 'neotree-mode-hook
-    (lambda ()
-        (evil-define-key 'normal neotree-mode-map (kbd "TAB") 'neotree-enter)
-        (evil-define-key 'normal neotree-mode-map (kbd "SPC") 'neotree-quick-look)
-        (evil-define-key 'normal neotree-mode-map (kbd "q") 'neotree-hide)
-        (evil-define-key 'normal neotree-mode-map (kbd "RET") 'neotree-enter)
-        (evil-define-key 'normal neotree-mode-map (kbd "g") 'neotree-refresh)
-        (evil-define-key 'normal neotree-mode-map (kbd "n") 'neotree-next-line)
-        (evil-define-key 'normal neotree-mode-map (kbd "p") 'neotree-previous-line)
-        (evil-define-key 'normal neotree-mode-map (kbd "A") 'neotree-stretch-toggle)
-        (evil-define-key 'normal neotree-mode-map (kbd "H") 'neotree-hidden-file-toggle))))
+  (use-package neotree
+    :config
+    (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
+    (define-key evil-normal-state-map [f8] 'neotree-toggle)
+    (global-set-key [f8] 'neotree-toggle))
+#+END_SRC
+*** Magit
+[[https://magit.vc/][Magit]], the better interface to git.
+#+BEGIN_SRC emacs-lisp
+  (use-package magit)
+#+END_SRC
+** File types and languages
+*** Org-mode
+Make sure that org mode starts in indent mode by default.
+#+BEGIN_SRC emacs-lisp
+  (use-package org
+    :ensure nil
+    :config
+    (add-hook 'org-mode-hook 'org-indent-mode)
+    (eval-after-load 'org-indent '(diminish 'org-indent-mode)))
+#+END_SRC
+** General coding plugins
+*** Company mode
+Completion engine for several languages
+#+BEGIN_SRC emacs-lisp
+  (use-package company
+    :diminish company-mode
+    :config
+    (add-hook 'after-init-hook 'global-company-mode))
 #+END_SRC
 
-
-*** DIRED
-Creates a function for creating a new file in DIRED.
+Add python to supported company languages
 #+BEGIN_SRC emacs-lisp
-(eval-after-load 'dired
-  '(progn
-     (defun my-dired-create-file (file)
-       "Create a file called FILE.
-       If FILE already exists, signal an error."
-       (interactive
-        (list (read-file-name "Create file: " (dired-current-directory))))
-       (let* ((expanded (expand-file-name file))
-              (try expanded)
-              (dir (directory-file-name (file-name-directory expanded)))
-              new)
-         (if (file-exists-p expanded)
-             (error "Cannot create file %s: file exists" expanded))
-         ;; Find the topmost nonexistent parent dir (variable `new')
-         (while (and try (not (file-exists-p try)) (not (equal new try)))
-           (setq new try
-                 try (directory-file-name (file-name-directory try))))
-         (when (not (file-exists-p dir))
-           (make-directory dir t))
-         (write-region "" nil expanded t)
-         (when new
-           (dired-add-file new)
-           (dired-move-to-filename))))))
+  (defun my/python-mode-hook ()
+    (add-to-list 'company-backends 'company-jedi))
+
+  (use-package company-jedi
+    :config
+    (add-hook 'python-mode-hook 'my/python-mode-hook))
+#+END_SRC
+** Graphical configuration
+Make sure all-the-icons is installed.
+If the fonts are not already installed, install that as well.
+#+BEGIN_SRC emacs-lisp
+  (defun aorst/font-installed-p (font-name)
+    "Check if font with FONT-NAME is available."
+    (if (find-font (font-spec :name font-name))
+        t
+      nil))
+
+  (use-package all-the-icons
+    :config
+    (when (and (not (aorst/font-installed-p "all-the-icons"))
+               (window-system))
+      (all-the-icons-install-fonts t)))
 #+END_SRC
 
-Bind it to '_' to make it right next to '+' which is the command for new directory.
+Use Doom emacs themes
 #+BEGIN_SRC emacs-lisp
-(define-key dired-mode-map (kbd "_") 'my-dired-create-file)
-(evil-define-key 'normal dired-mode-map (kbd "_") 'my-dired-create-file)
-#+END_SRC
-*** Autocompleting
-#+BEGIN_SRC emacs-lisp
-(global-set-key "\M-/" 'comint-dynamic-complete-filename)
-(define-key evil-insert-state-map (kbd "C-/") 'hippie-expand)
-#+END_SRC
+  (use-package doom-themes
+    :config
+    (setq doom-themes-enable-bold t
+          doom-themes-enable-italic t)
+    (load-theme 'doom-city-lights t)
 
-*** File finding
-The FZF package requires there to be a =fzf= executable somewhere in your =$PATH= to work properly.
-#+BEGIN_SRC emacs-lisp
-(use-package fzf
-:config
-(define-key evil-normal-state-map (kbd "M-f") 'fzf))
-#+END_SRC
-*** PDF modes
-#+BEGIN_SRC emacs-lisp
-(add-hook 'doc-view-mode-hook 'auto-revert-mode)
-#+END_SRC
+    (doom-themes-neotree-config)
 
-** Programming languages
-*** Python
-#+BEGIN_SRC emacs-lisp
-(setq python-shell-interpreter "ipython3"
-      python-shell-interpreter-args "-i --simple-prompt")
-(use-package elpy
-:init
-(setq elpy-shell-starting-directory 'current-directory)
-(elpy-enable))
-#+END_SRC
-*** C
-#+BEGIN_SRC emacs-lisp
-(defun infer-indentation-style ()
-  ;; if our source file uses tabs, we use tabs, if spaces spaces, and if
-  ;; neither, we use the current indent-tabs-mode
-  (let ((space-count (how-many "^  " (point-min) (point-max)))
-        (tab-count (how-many "^\t" (point-min) (point-max))))
-    (if (> space-count tab-count) (setq indent-tabs-mode nil))
-    (if (> tab-count space-count) (setq indent-tabs-mode t))))
-
-
-(setq c-default-style "linux"
-          c-basic-offset 2)
-(add-hook 'c-mode-hook (lambda ()
-    (setq indent-tabs-mode nil)
-    (infer-indentation-style)))
-#+END_SRC
-*** Haskell
-#+BEGIN_SRC emacs-lisp
-(use-package haskell-mode)
-#+END_SRC
-** Programming in general
-
-*** Snippets
-#+BEGIN_SRC emacs-lisp
-(use-package yasnippet
-:config
-(yas-global-mode 1))
-(use-package yasnippet-snippets)
-#+END_SRC
-*** Complete anything
-#+BEGIN_SRC emacs-lisp
-(use-package company)
-(add-hook 'after-init-hook 'global-company-mode)
-#+END_SRC
-*** Error checking - Flycheck
-#+BEGIN_SRC emacs-lisp
-(use-package flycheck
-:config
-(add-hook 'after-init-hook #'global-flycheck-mode)
-(define-key evil-normal-state-map (kbd "C-c C-p") 'flycheck-previous-error)
-(define-key evil-normal-state-map (kbd "C-c C-n") 'flycheck-next-error))
-
-;; NOTE! This requires projectile to work
-(defun setup-flycheck-gcc-project-path ()
-  (let ((root (ignore-errors (projectile-project-root))))
-    (when root
-      (add-to-list
-       (make-variable-buffer-local 'flycheck-gcc-include-path)
-       root)
-
-      (add-to-list
-       (make-variable-buffer-local 'flycheck-clang-include-path)
-       root)
-
-      (add-to-list
-       (make-variable-buffer-local 'flycheck-gcc-include-path)
-       (concat root "/include")
-
-       (add-to-list
-       (make-variable-buffer-local 'flycheck-clang-include-path)
-       (concat root "/include"))))))
-
-(add-hook 'c-mode-hook 'setup-flycheck-gcc-project-path)
-(add-hook 'c++-mode-hook 'setup-flycheck-gcc-project-path)
-#+END_SRC
-*** Jumping around (Ace-jump-mode)
-#+BEGIN_SRC emacs-lisp
-(use-package ace-jump-mode
-:config
-(setq ace-jump-mode-case-fold t)
-(setq ace-jump-mode-move-keys (loop for i from ?a to ?z collect i)))
-#+END_SRC
-** Org mode!
-#+BEGIN_SRC emacs-lisp
-(setq org-startup-indented 1)
-(add-hook 'org-mode-hook #'visual-line-mode)
-
-(setq org-image-actual-width '(400))
-(add-hook 'org-export-before-processing-hook #'org-remove-headlines)
-(add-hook 'org-export-before-processing-hook #'org-newpage-headlines)
-
-(use-package org-bullets)
-(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
-(setq org-export-in-background t)
-
-;; Babel languages
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((python . t)
-   (emacs-lisp . t)))
-#+END_SRC
-
-*** Org babel
-#+BEGIN_SRC emacs-lisp
-(setq org-babel-python-command "python3")
-#+END_SRC
-
-Make babel skip questions on whether to run code or not.
-#+BEGIN_SRC emacs-lisp
-(defun my-org-confirm-babel-evaluate (lang body)
-    "Don't confirm squat."
-    (not (member lang '("sh" "python" "elisp" "ruby" "shell" "dot" "perl"))))
-
-(setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-(setq org-babel-default-header-args
-(cons '(:exports . "both")
-(assq-delete-all :exports org-babel-default-header-args)))
-
-(setq org-babel-default-header-args
-(cons '(:results . "output verbatim replace")
-(assq-delete-all :results org-babel-default-header-args)))
-#+END_SRC
-
-*** LaTeX export stuff
-#+BEGIN_SRC emacs-lisp
-(setq org-latex-listings 'minted)
-(setq org-latex-minted-options
-     '(("frame" "lines") ("linenos=true")))
-(require 'ox-latex)
-
-(add-to-list 'org-latex-packages-alist '("" "minted"))
-(add-to-list 'org-latex-packages-alist '("" "subcaption"))
-(add-to-list 'org-latex-packages-alist '("" "float"))
-(add-to-list 'org-latex-packages-alist '("" "graphicx"))
-(add-to-list 'org-latex-packages-alist '("" "xcolor"))
-(add-to-list 'org-latex-packages-alist '("" "parskip"))
-
-;; Allow for :no_title: to be used to ignore a heading for latex export
-(defun org-remove-headlines (backend)
-  "Remove headlines with :no_title: tag."
-  (org-map-entries (lambda () (delete-region (point-at-bol) (point-at-eol)))
-                   "no_title"))
-
-;; Allow the use of :new_page: to force a new page before the heading in a latex export
-(defun org-newpage-headlines (backend)
-  "Add a latex newline to headings with :new_page: tag"
-  (org-map-entries (lambda ()
-      (beginning-of-line)
-      (insert "#+LATEX: \\newpage\n")
-      (let (
-            (p1 (point-at-bol))
-            (p2 (point-at-eol)))
-          (save-restriction
-              (narrow-to-region p1 p2)
-              (goto-char (point-min))
-              (while (search-forward ":new_page:" nil t)
-                   (replace-match "" nil t)))))
-  "new_page"))
-#+END_SRC
-
-*** Citations
-This allows us to use easy referencing from within Org.
-#+BEGIN_SRC emacs-lisp
-(use-package org-ref
-:init
-(setq reftex-default-bibliography '("~/references/references.bib"))
-(setq org-ref-bibliography-notes "~/references/notes.org"
-      org-ref-default-bibliography '("~/references/references.bib")
-      org-ref-pdf-directory "~/references/pdfs/"))
-(setq bibtex-completion-bibliography "~/references/references.bib"
-      bibtex-completion-library-path "~/references/pdfs"
-      bibtex-completion-notes-path "~/references/notes")
-
-(setq  org-latex-pdf-process
-       '("latexmk -shell-escape -bibtex -pdf %f"))
-#+END_SRC
-
-*** Presentations
-#+BEGIN_SRC emacs-lisp
-;; (use-package epresent
-;; :config
-;; (add-hook 'epresent-start-presentation-hook (lambda () (org-display-inline-images))))
-;; (evil-ex-define-cmd "present" 'epresent-run)
-;; (evil-define-key 'normal epresent-mode-map [up] 'scroll-down)
-;; (evil-define-key 'normal epresent-mode-map "k" 'scroll-down)
-;;
-;; (evil-define-key 'normal epresent-mode-map [down] 'scroll-up)
-;; (evil-define-key 'normal epresent-mode-map "j" 'scroll-up)
-;;
-;; (evil-define-key 'normal epresent-mode-map [left] 'epresent-previous-page)
-;; (evil-define-key 'normal epresent-mode-map [prior] 'epresent-previous-page)
-;; (evil-define-key 'normal epresent-mode-map "p" 'epresent-previous-page)
-;;
-;; (evil-define-key 'normal epresent-mode-map [right] 'epresent-next-page)
-;; (evil-define-key 'normal epresent-mode-map [next] 'epresent-next-page)
-;; (evil-define-key 'normal epresent-mode-map "n" 'epresent-next-page)
-;;
-;; (evil-define-key 'normal epresent-mode-map [f5] 'epresent-edit-text) ; Another [f5] exits edit mode.
-;; (evil-define-key 'normal epresent-mode-map "s" 'epresent-toggle-hide-src-blocks)
-;; (evil-define-key 'normal epresent-mode-map "S" 'epresent-toggle-hide-src-block)
-;;
-;; (evil-define-key 'normal epresent-mode-map "v" 'epresent-jump-to-page)
-;;
-;; (evil-define-key 'normal epresent-mode-map "q" 'epresent-quit)
-#+END_SRC
-
-*** Org journal
-#+BEGIN_SRC emacs-lisp
-(use-package org-journal)
-#+END_SRC
-** Calendar mode!
-Making sure that calendar mode works well with evil and =org-journal=!
-#+BEGIN_SRC emacs-lisp
-  (use-package calendar
-  :config
-  (evil-define-key 'normal calendar-mode-map "]" 'org-journal-next-entry)
-  (evil-define-key 'normal calendar-mode-map "[" 'org-journal-previous-entry)
-  (evil-define-key 'normal calendar-mode-map (kbd "S-<return>") 'org-journal-read-entry)
-  (evil-define-key 'normal calendar-mode-map (kbd "RET") 'org-journal-display-entry))
-#+END_SRC
-** General emacs configuration
-#+BEGIN_SRC emacs-lisp
-;; Allow for using just y or n instead of writing yes/no.
-(fset 'yes-or-no-p 'y-or-n-p)
-;; Disable that annoying bell
-(setq ring-bell-function 'ignore)
-;; Show the time
-(display-time-mode 1)
-(blink-cursor-mode -1)
-;; Enable emacs server
-(server-start)
-#+END_SRC
-
-Remove trailing whitespace upon save
-#+BEGIN_SRC emacs-lisp
-(use-package whitespace
-:ensure nil
-:hook (before-save . whitespace-cleanup))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-(use-package emacs
-:diminish auto-revert-mode)
+    (doom-themes-org-config))
 #+END_SRC
