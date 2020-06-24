@@ -137,6 +137,13 @@ While it may not be used much it can be very handy sometimes.
 #+BEGIN_SRC emacs-lisp
   (use-package magit)
 #+END_SRC
+*** Git gutter
+#+begin_src emacs-lisp
+  (use-package git-gutter
+    :diminish git-gutter-mode
+    :config
+    (global-git-gutter-mode 1))
+#+end_src
 ** File types and languages
 *** Org-mode
 Make sure that org mode starts in indent mode by default.
@@ -146,6 +153,8 @@ Make sure that org mode starts in indent mode by default.
     :config
     (add-hook 'org-mode-hook 'org-indent-mode)
     (eval-after-load 'org-indent '(diminish 'org-indent-mode)))
+
+  (require 'org-tempo)
 #+END_SRC
 
 Org-roam allows for backlinking notes.
