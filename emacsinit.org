@@ -74,6 +74,9 @@ Enables completion in the mini buffers
   (use-package ivy
     :config
     (ivy-mode 1))
+
+
+  (define-key ivy-minibuffer-map (kbd "C-w") 'backward-kill-word)
 #+end_src
 ** evil-mode - Vim key bindings
 Start by unbinding keys that might interfere later.
@@ -185,6 +188,10 @@ Org-roam allows for backlinking notes.
           :head "#+title: ${title}\n#+roam_alias: ${title}\n#+roam_key: cite:${title}\n"
           :unnarrowed t)))
 #+END_SRC
+*** Markdown
+#+begin_src emacs-lisp
+  (setq markdown-fontify-code-blocks-natively t)
+#+end_src
 ** General coding plugins
 *** LSP Mode
 Language server protocol. Works with company-mode!
