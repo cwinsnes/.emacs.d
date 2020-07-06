@@ -72,11 +72,78 @@ Remove trailing whitespace upon save
 Enables completion in the mini buffers
 #+begin_src emacs-lisp
   (use-package ivy
+    :diminish ivy-mode
     :config
     (ivy-mode 1))
 
 
   (define-key ivy-minibuffer-map (kbd "C-w") 'backward-kill-word)
+#+end_src
+*** Eye-browse
+Add a tab-like configuration instead of having to use multiple frames
+for different groups of buffers.
+#+begin_src emacs-lisp
+  (use-package eyebrowse
+  :diminish eyebrowse-mode
+  :after evil
+  :config
+  (eyebrowse-mode t)
+  ; Most of these are supposed to happen automatically but evil is not
+  ; detected for some reason.
+  (let ((map eyebrowse-mode-map))
+    (define-key map (kbd "C-<") 'eyebrowse-prev-window-config)
+    (define-key map (kbd "C->") 'eyebrowse-next-window-config)
+    (define-key map (kbd "C-'") 'eyebrowse-last-window-config)
+    (define-key map (kbd "C-\"") 'eyebrowse-close-window-config)
+    (define-key map (kbd "M-w") 'eyebrowse-close-window-config)
+    (define-key map (kbd "M-0") 'eyebrowse-switch-to-window-config-0)
+    (define-key map (kbd "M-1") 'eyebrowse-switch-to-window-config-1)
+    (define-key map (kbd "M-2") 'eyebrowse-switch-to-window-config-2)
+    (define-key map (kbd "M-3") 'eyebrowse-switch-to-window-config-3)
+    (define-key map (kbd "M-4") 'eyebrowse-switch-to-window-config-4)
+    (define-key map (kbd "M-5") 'eyebrowse-switch-to-window-config-5)
+    (define-key map (kbd "M-6") 'eyebrowse-switch-to-window-config-6)
+    (define-key map (kbd "M-7") 'eyebrowse-switch-to-window-config-7)
+    (define-key map (kbd "M-8") 'eyebrowse-switch-to-window-config-8)
+    (define-key map (kbd "M-9") 'eyebrowse-switch-to-window-config-9))
+  )
+#+end_src
+*** Graphical configuration
+Make sure all-the-icons is installed.
+If the fonts are not already installed, install that as well.
+#+BEGIN_SRC emacs-lisp
+  (defun aorst/font-installed-p (font-name)
+    "Check if font with FONT-NAME is available."
+    (if (find-font (font-spec :name font-name))
+        t
+      nil))
+
+  (use-package all-the-icons
+    :config
+    (when (and (not (aorst/font-installed-p "all-the-icons"))
+               (window-system))
+      (all-the-icons-install-fonts t)))
+#+END_SRC
+
+Use Doom emacs themes
+#+BEGIN_SRC emacs-lisp
+  (use-package doom-themes
+    :config
+    (setq doom-themes-enable-bold t
+          doom-themes-enable-italic t)
+    (load-theme 'doom-gruvbox t)
+
+    (doom-themes-neotree-config)
+
+    (doom-themes-org-config))
+#+END_SRC
+
+#+begin_src emacs-lisp
+  (use-package ivy-posframe
+    :diminish ivy-posframe-mode
+    :config
+    (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-point)))
+    (ivy-posframe-mode 1))
 #+end_src
 ** evil-mode - Vim key bindings
 Start by unbinding keys that might interfere later.
@@ -116,6 +183,7 @@ Add a leader key to evil, and set its bindings.
   (evil-leader/set-leader "<SPC>")
   (evil-leader/set-key
     "w" 'save-buffer
+    "o" 'delete-other-windows
     "f" 'find-file
     "g" 'magit-status
     "h" 'evil-ex-nohighlight
@@ -213,40 +281,3 @@ Completion engine for several languages
             company-idle-delay 0)
       (company-tng-configure-default))
 #+END_SRC
-** Graphical configuration
-Make sure all-the-icons is installed.
-If the fonts are not already installed, install that as well.
-#+BEGIN_SRC emacs-lisp
-  (defun aorst/font-installed-p (font-name)
-    "Check if font with FONT-NAME is available."
-    (if (find-font (font-spec :name font-name))
-        t
-      nil))
-
-  (use-package all-the-icons
-    :config
-    (when (and (not (aorst/font-installed-p "all-the-icons"))
-               (window-system))
-      (all-the-icons-install-fonts t)))
-#+END_SRC
-
-Use Doom emacs themes
-#+BEGIN_SRC emacs-lisp
-  (use-package doom-themes
-    :config
-    (setq doom-themes-enable-bold t
-          doom-themes-enable-italic t)
-    (load-theme 'doom-gruvbox t)
-
-    (doom-themes-neotree-config)
-
-    (doom-themes-org-config))
-#+END_SRC
-
-#+begin_src emacs-lisp
-  (use-package ivy-posframe
-    :diminish ivy-posframe-mode
-    :config
-    (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-point)))
-    (ivy-posframe-mode 1))
-#+end_src
