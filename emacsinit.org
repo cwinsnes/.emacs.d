@@ -154,6 +154,11 @@ the required tools.
 #+begin_src emacs-lisp
 (use-package vterm)
 #+end_src
+
+Also add a toggle ability, to quickly switch to and from vterm.
+#+begin_src emacs-lisp
+(use-package vterm-toggle)
+#+end_src
 ** evil-mode - Vim key bindings
 Start by unbinding keys that might interfere later.
 #+BEGIN_SRC emacs-lisp
@@ -196,7 +201,8 @@ Add a leader key to evil, and set its bindings.
     "f" 'find-file
     "g" 'magit-status
     "h" 'evil-ex-nohighlight
-    "b" 'ivy-switch-buffer)
+    "b" 'ivy-switch-buffer
+    "t" 'vterm-toggle)
 
   (with-eval-after-load 'evil-maps
     (define-key evil-normal-state-map (kbd "C-n") nil)
@@ -205,6 +211,8 @@ Add a leader key to evil, and set its bindings.
   (global-evil-leader-mode)
   (evil-mode 1)
 #+END_SRC
+
+
 
 ** File management
 *** Neotree
