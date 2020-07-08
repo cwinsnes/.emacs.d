@@ -175,7 +175,18 @@ packages might set evil mode keys to their commands.
     (setq evil-want-C-u-scroll t)
     (setq evil-search-module 'evil-search)
     (setq evil-want-keybinding nil))
+#+END_SRC
 
+Redefine =:q= to only close current window while =:quit= exits emacs
+entirely. This is mostly important when working with eyebrowse or
+similar tabbing items as =:q= by default will kill emacs entirely if
+on last window of current tab.
+#+begin_src emacs-lisp
+  (evil-ex-define-cmd "q" 'delete-window)
+  (evil-ex-define-cmd "quit" 'evil-quit)
+#+end_src
+
+#+begin_src emacs-lisp
   (use-package evil-org
     :after evil)
 
@@ -211,7 +222,6 @@ Add a leader key to evil, and set its bindings.
   (global-evil-leader-mode)
   (evil-mode 1)
 #+END_SRC
-
 
 
 ** File management
