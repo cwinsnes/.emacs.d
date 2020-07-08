@@ -47,6 +47,10 @@ Needs to be done here because it is used by use-package in configurations.
   ;; Enable emacs server
   (server-start)
 
+  ;; Enable both line and column number in mode-line.
+  (line-number-mode t)
+  (column-number-mode t)
+
   ;; Remove a bunch of visual noise from emacs
   (setq inhibit-startup-screen t)
   (menu-bar-mode -1)
