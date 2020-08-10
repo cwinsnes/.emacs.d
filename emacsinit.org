@@ -120,6 +120,7 @@ frames, which is nice in combination with EyeBrowse.
   (use-package olivetti)
 #+end_src
 *** Graphical configuration
+**** Fonts
 Make sure all-the-icons is installed.
 If the fonts are not already installed, install that as well.
 #+BEGIN_SRC emacs-lisp
@@ -136,6 +137,11 @@ If the fonts are not already installed, install that as well.
       (all-the-icons-install-fonts t)))
 #+END_SRC
 
+#+begin_src emacs-lisp
+  (set-face-attribute 'default t :font "DejaVu Sans Mono-10" )
+#+end_src
+
+**** Themes
 Use Doom emacs themes
 #+BEGIN_SRC emacs-lisp
   (use-package doom-themes
@@ -149,10 +155,7 @@ Use Doom emacs themes
     (doom-themes-org-config))
 #+END_SRC
 
-#+begin_src emacs-lisp
-  (set-face-attribute 'default t :font "DejaVu Sans Mono-10" )
-#+end_src
-
+**** Look
 #+begin_src emacs-lisp
   (use-package ivy-posframe
     :diminish ivy-posframe-mode
@@ -164,6 +167,10 @@ Use Doom emacs themes
 #+begin_src emacs-lisp
   (use-package doom-modeline
   :config (doom-modeline-mode))
+#+end_src
+
+#+begin_src emacs-lisp
+(setq display-time-format "%H:%M")
 #+end_src
 ** LibVTerm
 Adding a proper terminal into emacs. This package requires
