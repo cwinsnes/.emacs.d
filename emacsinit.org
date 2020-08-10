@@ -112,6 +112,13 @@ for different groups of buffers.
     (define-key map (kbd "M-9") 'eyebrowse-switch-to-window-config-9))
   )
 #+end_src
+*** Olivetti mode
+When writing a single file, it can be nice to have a hyperfocus mode.
+Olivett is chosen specifically because it doesn't mess with other
+frames, which is nice in combination with EyeBrowse.
+#+begin_src emacs-lisp
+  (use-package olivetti)
+#+end_src
 *** Graphical configuration
 Make sure all-the-icons is installed.
 If the fonts are not already installed, install that as well.
@@ -141,6 +148,10 @@ Use Doom emacs themes
 
     (doom-themes-org-config))
 #+END_SRC
+
+#+begin_src emacs-lisp
+  (set-face-attribute 'default t :font "DejaVu Sans Mono-10" )
+#+end_src
 
 #+begin_src emacs-lisp
   (use-package ivy-posframe
@@ -217,7 +228,8 @@ Add a leader key to evil, and set its bindings.
     "g" 'magit-status
     "h" 'evil-ex-nohighlight
     "b" 'ivy-switch-buffer
-    "t" 'vterm-toggle)
+    "t" 'vterm-toggle
+    "d" 'olivetti-mode)
 
   (with-eval-after-load 'evil-maps
     (define-key evil-normal-state-map (kbd "C-n") nil)
