@@ -136,7 +136,7 @@ Use Doom emacs themes
     (setq doom-themes-enable-bold t
           doom-themes-enable-italic t)
     (load-theme 'doom-gruvbox t)
-
+    (setq doom-themes-neotree-file-icons t)
     (doom-themes-neotree-config)
 
     (doom-themes-org-config))
@@ -291,23 +291,43 @@ Org-roam allows for backlinking notes.
   (setq markdown-fontify-code-blocks-natively t)
 #+end_src
 ** General coding plugins
-*** LSP Mode
-Language server protocol. Works with company-mode!
-#+BEGIN_SRC emacs-lisp
-  (use-package lsp-mode
-    :diminish lsp-mode
-    :hook (prog-mode . lsp-deferred)
-    :commands (lsp lsp-deferred))
-#+END_SRC
 *** Company mode
 Completion engine for several languages
 #+BEGIN_SRC emacs-lisp
     (use-package company
       :diminish company-mode
       :config
+      (add-to-list 'company-backends 'company-capf)
       (add-hook 'after-init-hook 'global-company-mode)
       (setq company-minimum-prefix-length 1
             company-dabbrev-downcase 0
             company-idle-delay 0)
       (company-tng-configure-default))
+#+END_SRC
+*** Tags
+A solution for jumping to definitions that is slightly less powerful
+than a ctags/etags file but it works most of the time pretty well.
+See [[https://github.com/jacktasia/dumb-jump][the webpage]] for supported languages.
+
+Should have ag/rg installed for this to be fast enough but will work with standard grep.
+#+begin_src emacs-lisp
+  (use-package dumb-jump
+    :config
+    (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
+#+end_src
+
+*** Error checking
+#+begin_src emacs-lisp
+  (use-package flymake
+    :hook
+    (prog-mode . flymake-mode))
+#+end_src
+*** LSP Mode
+Language server protocol. Works with company-mode!
+Currently disabled due to performance issues
+#+BEGIN_SRC emacs-lisp
+;;    (use-package lsp-mode
+;;      :diminish lsp-mode
+;;      :commands (lsp lsp-deferred))
+;;      :hook (prog-mode . lsp))
 #+END_SRC
