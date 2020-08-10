@@ -318,9 +318,11 @@ Should have ag/rg installed for this to be fast enough but will work with standa
 
 *** Error checking
 #+begin_src emacs-lisp
-  (use-package flymake
-    :hook
-    (prog-mode . flymake-mode))
+  (use-package flycheck
+    :init (global-flycheck-mode)
+    :config
+    (define-key evil-normal-state-map (kbd "M-m") 'flycheck-next-error)
+    (define-key evil-normal-state-map (kbd "M-n") 'flycheck-previous-error))
 #+end_src
 *** LSP Mode
 Language server protocol. Works with company-mode!
