@@ -227,7 +227,6 @@ Add a leader key to evil, and set its bindings.
   (evil-mode 1)
 #+END_SRC
 
-
 ** File management
 *** Neotree
 Add a file browser system to emacs.
