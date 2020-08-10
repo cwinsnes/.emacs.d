@@ -91,6 +91,7 @@ for different groups of buffers.
   :diminish eyebrowse-mode
   :after evil
   :config
+  (setq eyebrowse-new-workspace "*scratch*")
   (eyebrowse-mode t)
   ; Most of these are supposed to happen automatically but evil is not
   ; detected for some reason.
@@ -117,7 +118,9 @@ When writing a single file, it can be nice to have a hyperfocus mode.
 Olivett is chosen specifically because it doesn't mess with other
 frames, which is nice in combination with EyeBrowse.
 #+begin_src emacs-lisp
-  (use-package olivetti)
+  (use-package olivetti
+    :config
+    (setq olivetti-body-width 100))
 #+end_src
 *** Graphical configuration
 **** Fonts
