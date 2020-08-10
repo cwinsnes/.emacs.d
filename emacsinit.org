@@ -160,6 +160,11 @@ Use Doom emacs themes
     (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-point)))
     (ivy-posframe-mode 1))
 #+end_src
+
+#+begin_src emacs-lisp
+  (use-package doom-modeline
+  :config (doom-modeline-mode))
+#+end_src
 ** LibVTerm
 Adding a proper terminal into emacs. This package requires
 =libtool-bin= and =cmake > 3.11= to work properly.
