@@ -120,7 +120,8 @@ frames, which is nice in combination with EyeBrowse.
 #+begin_src emacs-lisp
   (use-package olivetti
     :config
-    (setq olivetti-body-width 100))
+    (setq-default olivetti-body-width 100)
+    (setq olivetti-mode-on-hook '()))
 #+end_src
 *** Graphical configuration
 **** Fonts
@@ -215,6 +216,7 @@ on last window of current tab.
   (evil-ex-define-cmd "q" 'delete-window)
   (evil-ex-define-cmd "quit" 'evil-quit)
 #+end_src
+**** Add key bindings for Evil in different modes
 
 #+begin_src emacs-lisp
   (use-package evil-org
@@ -228,7 +230,7 @@ on last window of current tab.
   (use-package evil-magit
     :after evil)
 #+END_SRC
-
+**** Evil Leader key
 Add a leader key to evil, and set its bindings.
 #+BEGIN_SRC emacs-lisp
   ;; Evil leader has to be loaded before Evil to work in initial buffers.
@@ -253,6 +255,16 @@ Add a leader key to evil, and set its bindings.
   (global-evil-leader-mode)
   (evil-mode 1)
 #+END_SRC
+**** Extra Evil plugins
+Add surround, similar to the vim-surround package.
+Also define a couple of new surrounds.
+#+begin_src emacs-lisp
+(use-package evil-surround
+:diminish
+(evil-surround-mode)
+:config
+(global-evil-surround-mode 1))
+#+end_src
 
 ** File management
 *** Neotree
@@ -276,6 +288,13 @@ While it may not be used much it can be very handy sometimes.
     :diminish git-gutter-mode
     :config
     (global-git-gutter-mode 1))
+#+end_src
+*** Persistent undo
+Allows for using undo between session. Note that saving history to disk risks leaking information.
+#+begin_src emacs-lisp
+(global-undo-tree-mode)
+(setq undo-tree-auto-save-history t)
+(setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo")))
 #+end_src
 ** File types and languages
 *** Org-mode
