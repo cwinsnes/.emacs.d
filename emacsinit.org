@@ -353,6 +353,10 @@ Org-roam allows for backlinking notes.
 #+begin_src emacs-lisp
   (setq markdown-fontify-code-blocks-natively t)
 #+end_src
+*** Python
+#+begin_src emacs-lisp
+(setq python-shell-interpreter "python3")
+#+end_src
 ** General coding plugins
 *** Company mode
 Completion engine for several languages
@@ -393,12 +397,16 @@ Will fallback to ripgrep if no tags file is found.
 
 *** Error checking
 #+begin_src emacs-lisp
-  (use-package flycheck
-    :diminish flycheck-mode
-    :init (global-flycheck-mode)
-    :config
-    (define-key evil-normal-state-map (kbd "M-m") 'flycheck-next-error)
-    (define-key evil-normal-state-map (kbd "M-n") 'flycheck-previous-error))
+    (use-package flycheck
+      :diminish flycheck-mode
+      :init (global-flycheck-mode)
+      :config
+      (define-key evil-normal-state-map (kbd "M-m") 'flycheck-next-error)
+      (define-key evil-normal-state-map (kbd "M-n") 'flycheck-previous-error)
+
+      (setq flycheck-python-pylint-executable "python3")
+      (setq flycheck-python-flake8-executable "python3")
+      (setq flycheck-python-pycompile-executable "python3"))
 #+end_src
 *** LSP Mode
 Language server protocol. Works with company-mode!
