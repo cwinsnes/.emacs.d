@@ -12,3 +12,5 @@ recentf
 transient/
 .python-environments
 tramp
+saves/
+undo/
