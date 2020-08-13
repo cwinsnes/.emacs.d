@@ -26,6 +26,12 @@ file!
   (eval-when-compile
     (require 'use-package)
     (setq use-package-always-ensure t))
+
+(use-package auto-package-update
+  :config
+  (setq auto-package-update-delete-old-versions t)
+  (setq auto-package-update-hide-results t)
+  (auto-package-update-maybe))
 #+END_SRC
 
 Add ability to diminish minor modes from list.
@@ -78,6 +84,7 @@ Enables completion in the mini buffers
   (use-package ivy
     :diminish ivy-mode
     :config
+    (setq ivy-use-selectable-prompt t)
     (ivy-mode 1))
 
 
@@ -142,7 +149,10 @@ If the fonts are not already installed, install that as well.
 #+END_SRC
 
 #+begin_src emacs-lisp
-  (set-face-attribute 'default t :font "DejaVu Sans Mono-10" )
+    (use-package emacs
+      :init
+      (set-face-attribute 'default nil :font "DejaVu Sans Mono-10" )
+      (set-frame-font "Dejavu Sans Mono-10" nil t))
 #+end_src
 
 **** Themes
@@ -169,8 +179,7 @@ Use Doom emacs themes
 #+end_src
 
 #+begin_src emacs-lisp
-  (use-package doom-modeline
-  :config (doom-modeline-mode))
+  (use-package doom-modeline)
 #+end_src
 
 #+begin_src emacs-lisp
@@ -231,7 +240,9 @@ on last window of current tab.
     :after evil)
 #+END_SRC
 **** Evil Leader key
-Add a leader key to evil, and set its bindings.
+Add a leader key to evil, and set its bindings.  Yes, this is the same
+as simply adding keybindings for all this but I like the ease of
+setting this up.
 #+BEGIN_SRC emacs-lisp
   ;; Evil leader has to be loaded before Evil to work in initial buffers.
   (use-package evil-leader)
@@ -296,6 +307,10 @@ Allows for using undo between session. Note that saving history to disk risks le
 (setq undo-tree-auto-save-history t)
 (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo")))
 #+end_src
+*** Remote editing
+#+begin_src emacs-lisp
+(add-to-list 'tramp-remote-path "/snap/bin")
+#+end_src
 ** File types and languages
 *** Org-mode
 Make sure that org mode starts in indent mode by default.
@@ -351,20 +366,33 @@ Completion engine for several languages
       (company-tng-configure-default))
 #+END_SRC
 *** Tags
-A solution for jumping to definitions that is slightly less powerful
-than a ctags/etags file but it works most of the time pretty well.
-See [[https://github.com/jacktasia/dumb-jump][the webpage]] for supported languages.
-
-Should have ag/rg installed for this to be fast enough but will work with standard grep.
+Make tags work better in Emacs and auto use the correct files.
+Will fallback to ripgrep if no tags file is found.
 #+begin_src emacs-lisp
-  (use-package dumb-jump
-    :config
-    (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
+    (use-package counsel-etags
+      :bind (("C-]" . counsel-etags-find-tag-at-point))
+      :init
+      ;; Don't ask before rereading the TAGS files if they have changed
+      (setq tags-revert-without-query t)
+      ;; Don't warn when TAGS files are large
+      (setq large-file-warning-threshold nil)
+      (add-hook 'prog-mode-hook
+                (lambda ()
+                  (add-hook 'after-save-hook
+                            'counsel-etags-virtual-update-tags 'append 'local)))
+      :config
+      (setq counsel-etags-update-interval 60)
+      (add-to-list 'counsel-etags-ignore-directories "build"))
+
+    ;; Bind tag finding to normal key in evil mode
+    (with-eval-after-load 'evil-maps
+      (define-key evil-normal-state-map (kbd "C-]") 'counsel-etags-find-tag-at-point))
 #+end_src
 
 *** Error checking
 #+begin_src emacs-lisp
   (use-package flycheck
+    :diminish flycheck-mode
     :init (global-flycheck-mode)
     :config
     (define-key evil-normal-state-map (kbd "M-m") 'flycheck-next-error)
