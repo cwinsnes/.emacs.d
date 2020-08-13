@@ -330,10 +330,12 @@ Org-roam allows for backlinking notes.
     :diminish org-roam-mode
     :hook
     (after-init . org-roam-mode)
-    :custom
-    (org-roam-directory "~/org/")
+    :config
+    (setq org-roam-directory (expand-file-name "~/org/"))
+    (setq org-roam-index-file "index.org")
     :bind (:map org-roam-mode-map
                 (("C-c n l" . org-roam)
+                 ("C-c n n" . org-roam-jump-to-index)
                  ("C-c n f" . org-roam-find-file)
                  ("C-c n g" . org-roam-graph-show))
                 :map org-mode-map
@@ -344,7 +346,7 @@ Org-roam allows for backlinking notes.
         '(("d" "default" plain (function org-roam--capture-get-point)
           "%?"
           :file-name "%<%Y%m%d>-${slug}"
-          :head "#+title: ${title}\n#+roam_alias: ${title}\n#+roam_key: cite:${title}\n"
+          :head "#+title: ${title}\n#+roam_alias: ${title}\n#+roam_key: cite:${title}\n#+roam_tags: ${title}\n\n"
           :unnarrowed t)))
 #+END_SRC
 *** Markdown
@@ -362,7 +364,7 @@ Completion engine for several languages
       (add-hook 'after-init-hook 'global-company-mode)
       (setq company-minimum-prefix-length 1
             company-dabbrev-downcase 0
-            company-idle-delay 0)
+            company-idle-delay 0.5)
       (company-tng-configure-default))
 #+END_SRC
 *** Tags
