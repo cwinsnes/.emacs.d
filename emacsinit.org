@@ -4,17 +4,13 @@ Use org-babel-load-file to load the file.
 
 Essentially, the file should be loaded from your init.el using
 #+BEGIN_EXAMPLE
-(require 'package)
-(setq package-enable-at-startup nil)
-(add-to-list 'package-archives
-             '("melpa" . "https://melpa.org/packages/"))
-(package-initialize)
+  (require 'package)
+  (setq package-enable-at-startup nil)
+  (add-to-list 'package-archives
+               '("melpa" . "https://melpa.org/packages/"))
+  (package-initialize)
 
-(package-installed-p 'use-package)
-(package-refresh-contents)
-(package-install 'use-package)
-
-(org-babel-load-file (expand-file-name "~/.emacs.d/emacsinit.org"))
+  (org-babel-load-file (expand-file-name "~/.emacs.d/emacsinit.org"))
 #+END_EXAMPLE
 
 * Init
@@ -23,15 +19,19 @@ We are going to be using use-package as a package manager and
 package configuration system. This has to be done first in the
 file!
 #+BEGIN_SRC emacs-lisp
+  (unless (package-installed-p 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package))
+
   (eval-when-compile
     (require 'use-package)
     (setq use-package-always-ensure t))
 
-(use-package auto-package-update
-  :config
-  (setq auto-package-update-delete-old-versions t)
-  (setq auto-package-update-hide-results t)
-  (auto-package-update-maybe))
+  (use-package auto-package-update
+    :config
+    (setq auto-package-update-delete-old-versions t)
+    (setq auto-package-update-hide-results t)
+    (auto-package-update-maybe))
 #+END_SRC
 
 Add ability to diminish minor modes from list.
