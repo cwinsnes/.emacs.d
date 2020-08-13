@@ -188,7 +188,8 @@ Use Doom emacs themes
 #+end_src
 
 #+begin_src emacs-lisp
-  (use-package doom-modeline)
+  (use-package doom-modeline
+    :init (doom-modeline-mode 1))
 #+end_src
 
 #+begin_src emacs-lisp
