@@ -325,13 +325,29 @@ Allows for using undo between session. Note that saving history to disk risks le
 *** Org-mode
 Make sure that org mode starts in indent mode by default.
 #+BEGIN_SRC emacs-lisp
-  (use-package org
-    :ensure nil
-    :config
-    (add-hook 'org-mode-hook 'org-indent-mode)
-    (eval-after-load 'org-indent '(diminish 'org-indent-mode)))
+     (use-package org
+       :ensure nil
+       :config
+       (custom-set-faces
+        '(org-headline-done
+          ((((class color) (min-colors 16))
+            (:foreground "light gray")))))
 
-  (require 'org-tempo)
+       (setq org-fontify-done-headline t)
+       (setq org-todo-keywords
+         '((sequence "TODO(t)" "DOING(o)" "|" "DONE(d)")
+           (sequence "|" "CANCELED(c)")))
+       (setq org-todo-keyword-faces
+         '(("TODO" . (:foreground "red" :weight bold))
+           ("DOING" . "yellow")
+           ("DONE" . (:foreground "green" :weight bold))
+           ("CANCELED" . (:foreground "gray" :weight bold))))
+       ;; Make single space end sentences.
+       (setq sentence-end-double-space nil)
+       (add-hook 'org-mode-hook 'org-indent-mode)
+       (eval-after-load 'org-indent '(diminish 'org-indent-mode)))
+
+     (require 'org-tempo)
 #+END_SRC
 
 Make Org mode open in current window when following links, by default.
@@ -347,9 +363,9 @@ Code kinda copied from [[https://stackoverflow.com/questions/17590784/how-to-let
                                 (wl . wl)))
                               ))
     (org-open-at-point)))
-(define-key org-mode-map (kbd "C-c C-o") 'org-force-open-current-window)
+(define-key org-mode-map (kbd "C-c o") 'org-force-open-current-window)
 ;; Redefine old behaviour into another mapping
-(define-key org-mode-map (kbd "C-c C-S-o") 'org-open-at-point)
+(define-key org-mode-map (kbd "C-c C-o") 'org-open-at-point)
 #+end_src
 
 Org-roam allows for backlinking notes.
@@ -361,11 +377,12 @@ Org-roam allows for backlinking notes.
     :config
     (setq org-roam-directory (expand-file-name "~/org/"))
     (setq org-roam-index-file "~/org/index.org")
+    (setq org-roam-graph-viewer nil)
     :bind (:map org-roam-mode-map
                 (("C-c n l" . org-roam)
                  ("C-c n n" . org-roam-jump-to-index)
                  ("C-c n f" . org-roam-find-file)
-                 ("C-c n g" . org-roam-graph-show))
+                 ("C-c n g" . org-roam-graph))
                 :map org-mode-map
                 (("C-c n i" . org-roam-insert))
                 (("C-c n I" . org-roam-insert-immediate))))
