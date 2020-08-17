@@ -87,6 +87,16 @@ Remove trailing whitespace upon save
     (global-auto-revert-mode)
     (diminish 'auto-revert-mode))
 #+END_SRC
+*** Programming settings
+Try to use space indententation essentially everywere.
+#+begin_src emacs-lisp
+(add-hook 'find-file-hook '(lambda ()
+  (if (and buffer-file-name
+           (string-match "/gnulib\\>" (buffer-file-name))
+           (not (string-equal mode-name "Change Log"))
+           (not (string-equal mode-name "Makefile")))
+      (setq indent-tabs-mode nil))))
+#+end_src
 *** Ivy
 Enables completion in the mini buffers
 #+begin_src emacs-lisp
@@ -440,25 +450,16 @@ Will fallback to ripgrep if no tags file is found.
       (define-key evil-normal-state-map (kbd "C-]") 'counsel-etags-find-tag-at-point))
 #+end_src
 
-*** Error checking
-#+begin_src emacs-lisp
-    (use-package flycheck
-      :diminish flycheck-mode
-      :init (global-flycheck-mode)
-      :config
-      (define-key evil-normal-state-map (kbd "M-m") 'flycheck-next-error)
-      (define-key evil-normal-state-map (kbd "M-n") 'flycheck-previous-error)
-
-      (setq flycheck-python-pylint-executable "python3")
-      (setq flycheck-python-flake8-executable "python3")
-      (setq flycheck-python-pycompile-executable "python3"))
-#+end_src
-*** LSP Mode
+*** Eglot
 Language server protocol. Works with company-mode!
-Currently disabled due to performance issues
-#+BEGIN_SRC emacs-lisp
-;;    (use-package lsp-mode
-;;      :diminish lsp-mode
-;;      :commands (lsp lsp-deferred))
-;;      :hook (prog-mode . lsp))
-#+END_SRC
+
+#+begin_src emacs-lisp
+  (use-package eglot
+    :config
+    (define-key evil-normal-state-map (kbd "M-m") 'flymake-goto-next-error)
+    (define-key evil-normal-state-map (kbd "M-n") 'flymake-goto-prev-error)
+
+    (add-hook 'latex-mode-hook 'eglot)
+    (add-hook 'python-mode-hook 'eglot)
+    (add-hook 'c-mode-hook 'eglot))
+#+end_src
