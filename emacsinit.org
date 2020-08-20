@@ -71,6 +71,12 @@ Needs to be done here because it is used by use-package in configurations.
     kept-new-versions 6
     kept-old-versions 2
     version-control t)
+
+  ;; Make sure that garbage collection is much higher than default
+  ;; Important for LSP-mode
+  (setq gc-cons-threshold 100000000)
+  ;; For the same reason, change read-output-max
+  (setq read-process-output-max (* 1024 1024))
 #+END_SRC
 
 Remove trailing whitespace upon save
@@ -213,12 +219,9 @@ If =M-x vterm= is run, libvterm will be installed automatically using
 the required tools.
 #+begin_src emacs-lisp
 (use-package vterm)
+(defalias 'terminal 'vterm)
 #+end_src
 
-Also add a toggle ability, to quickly switch to and from vterm.
-#+begin_src emacs-lisp
-(use-package vterm-toggle)
-#+end_src
 ** evil-mode - Vim key bindings
 Start by unbinding keys that might interfere later.
 #+BEGIN_SRC emacs-lisp
@@ -235,6 +238,11 @@ packages might set evil mode keys to their commands.
     (setq evil-want-C-u-scroll t)
     (setq evil-search-module 'evil-search)
     (setq evil-want-keybinding nil))
+
+  ;; Enable the use of z-<buttons> for folding
+  (use-package hideshow
+    :config
+    (add-hook 'prog-mode-hook 'hs-minor-mode))
 #+END_SRC
 
 Redefine =:q= to only close current window while =:quit= exits emacs
@@ -329,7 +337,9 @@ Allows for using undo between session. Note that saving history to disk risks le
 #+end_src
 *** Remote editing
 #+begin_src emacs-lisp
-(add-to-list 'tramp-remote-path "/snap/bin")
+  (use-package tramp
+    :config
+    (add-to-list 'tramp-remote-path "/snap/bin"))
 #+end_src
 ** File types and languages
 *** Org-mode
@@ -506,9 +516,25 @@ Will fallback to ripgrep if no tags file is found.
 Language server protocol. Works with company-mode!
 
 #+begin_src emacs-lisp
-  (use-package eglot
+  ;; (use-package eglot
+  ;;   :config
+  ;;   (add-hook 'latex-mode-hook 'eglot-ensure)
+  ;;   (add-hook 'python-mode-hook 'eglot-ensure)
+  ;;   (add-hook 'c-mode-hook 'eglot-ensure))
+
+  (use-package lsp-mode
+    :hook
+    (python-mode . lsp-deferred)
+    :commands
+    (lsp lsp-deferred)
     :config
-    (add-hook 'latex-mode-hook 'eglot-ensure)
-    (add-hook 'python-mode-hook 'eglot-ensure)
-    (add-hook 'c-mode-hook 'eglot-ensure))
+    (setq lsp-completion-provider :capf)
+    (setq lsp-idle-delay 0.1)
+    (lsp-register-client
+     (make-lsp-client :new-connection (lsp-tramp-connection "pyls")
+                      :major-modes '(python-mode)
+                      :remote? t
+                      :server-id 'pyls-remote)))
+
+  (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
 #+end_src
