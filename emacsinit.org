@@ -265,7 +265,10 @@ on last window of current tab.
     (evil-collection-init))
 
   (use-package evil-magit
-    :after evil)
+    :after evil
+    :config
+    (evil-ex-define-cmd "GCommit" 'magit-commit)
+    (evil-ex-define-cmd "GAdd" 'magit-stage-file))
 #+END_SRC
 **** Evil Leader key
 Add a leader key to evil, and set its bindings.  Yes, this is the same
