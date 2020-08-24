@@ -76,7 +76,7 @@ Needs to be done here because it is used by use-package in configurations.
   ;; Important for LSP-mode
   (setq gc-cons-threshold 100000000)
   ;; For the same reason, change read-output-max
-  (setq read-process-output-max (* 1024 1024))
+  (setq read-process-output-max (* 1024 1024 5))
 #+END_SRC
 
 Remove trailing whitespace upon save
@@ -374,6 +374,17 @@ Set up the basic settings of org-mode.
   (require 'org-tempo)
 #+END_SRC
 
+Prettify the way headlines and such look
+
+#+begin_src emacs-lisp
+  (use-package org-superstar
+    :config
+    (setq org-hide-leading-stars nil)
+    (setq org-superstar-leading-bullet " ")
+    (setq org-superstar-headline-bullets-list '("\u203A"))
+    (add-hook 'org-mode-hook 'org-superstar-mode))
+#+end_src
+
 **** Org links
 Make Org mode open in current window when following links, by default.
 Code kinda copied from [[https://stackoverflow.com/questions/17590784/how-to-let-org-mode-open-a-link-like-file-file-org-in-current-window-inste][here]].
@@ -532,7 +543,7 @@ Language server protocol. Works with company-mode!
     (lsp lsp-deferred)
     :config
     (setq lsp-completion-provider :capf)
-    (setq lsp-idle-delay 0.1)
+    (setq lsp-idle-delay 0.2)
     (lsp-register-client
      (make-lsp-client :new-connection (lsp-tramp-connection "pyls")
                       :major-modes '(python-mode)
