@@ -77,6 +77,9 @@ Needs to be done here because it is used by use-package in configurations.
   (setq gc-cons-threshold 100000000)
   ;; For the same reason, change read-output-max
   (setq read-process-output-max (* 1024 1024 5))
+
+  ;; Allow extra_files
+  (add-to-list 'load-path "~/.emacs.d/extra_files")
 #+END_SRC
 
 Remove trailing whitespace upon save
@@ -114,6 +117,15 @@ Enables completion in the mini buffers
 
 
   (define-key ivy-minibuffer-map (kbd "C-w") 'backward-kill-word)
+#+end_src
+*** Helm
+Some package require helm to work.
+This is not used most of the time.
+#+begin_src emacs-lisp
+  (use-package helm
+    :config
+    (helm-mode nil))
+  (use-package helm-org)
 #+end_src
 *** Eye-browse
 Add a tab-like configuration instead of having to use multiple frames
@@ -444,32 +456,60 @@ Do not prettify current line.
   ;; (add-hook 'markdown-mode-hook (lambda () (markdown-toggle-markup-hiding 1)))
 #+end_src
 
+**** Org-wiki
+#+begin_src emacs-lisp
+  (load "org-wiki/org-wiki")
+  (setq org-wiki-location "~/org")
+
+  (setq org-wiki-template
+        (string-trim
+  "
+  ,#+TITLE: %n
+  ,#+DESCRIPTION:
+  ,#+KEYWORDS: %n
+  ,#+STARTUP:  content
+  ,#+DATE: %d
+
+  - [[wiki:index][Index]]
+
+  - Related:
+
+  ,* %n
+  "))
+
+  (global-set-key (kbd "C-c n f") 'org-wiki-helm)
+  (global-set-key (kbd "C-c n w") 'org-wiki-index)
+  (define-key org-mode-map (kbd "C-c n i") 'org-wiki-insert-link)
+  (define-key org-mode-map (kbd "C-c n n") 'org-wiki-insert-new)
+  (define-key org-mode-map (kbd "C-c n a") 'org-insert-link)
+#+end_src
+
 **** Org-roam
 Org-roam allows for backlinking notes.
 #+BEGIN_SRC emacs-lisp
-  (use-package org-roam
-    :diminish org-roam-mode
-    :hook
-    (after-init . org-roam-mode)
-    :config
-    (setq org-roam-directory (expand-file-name "~/org/"))
-    (setq org-roam-index-file "~/org/index.org")
-    (setq org-roam-graph-viewer nil)
-    :bind (:map org-roam-mode-map
-                (("C-c n l" . org-roam)
-                 ("C-c n n" . org-roam-jump-to-index)
-                 ("C-c n f" . org-roam-find-file)
-                 ("C-c n g" . org-roam-graph))
-                :map org-mode-map
-                (("C-c n i" . org-roam-insert))
-                (("C-c n I" . org-roam-insert-immediate))))
-
-  (setq org-roam-capture-templates
-        '(("d" "default" plain (function org-roam--capture-get-point)
-          "%?"
-          :file-name "%<%Y%m%d>-${slug}"
-          :head "#+title: ${title}\n#+roam_alias: ${title}\n#+roam_key: cite:${title}\n#+roam_tags: ${title}\n\n"
-          :unnarrowed t)))
+;;   (use-package org-roam
+;;     :diminish org-roam-mode
+;;     :hook
+;;     (after-init . org-roam-mode)
+;;     :config
+;;     (setq org-roam-directory (expand-file-name "~/org/"))
+;;     (setq org-roam-index-file "~/org/index.org")
+;;     (setq org-roam-graph-viewer nil)
+;;     :bind (:map org-roam-mode-map
+;;                 (("C-c n l" . org-roam)
+;;                  ("C-c n n" . org-roam-jump-to-index)
+;;                  ("C-c n f" . org-roam-find-file)
+;;                  ("C-c n g" . org-roam-graph))
+;;                 :map org-mode-map
+;;                 (("C-c n i" . org-roam-insert))
+;;                 (("C-c n I" . org-roam-insert-immediate))))
+;;
+;;   (setq org-roam-capture-templates
+;;         '(("d" "default" plain (function org-roam--capture-get-point)
+;;           "%?"
+;;           :file-name "%<%Y%m%d>-${slug}"
+;;           :head "#+title: ${title}\n#+roam_alias: ${title}\n#+roam_key: cite:${title}\n#+roam_tags: ${title}\n\n"
+;;           :unnarrowed t)))
 #+END_SRC
 *** Markdown
 #+begin_src emacs-lisp
