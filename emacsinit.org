@@ -106,25 +106,20 @@ Try to use space indententation essentially everywere.
            (not (string-equal mode-name "Makefile")))
       (setq indent-tabs-mode nil))))
 #+end_src
-*** Ivy
-Enables completion in the mini buffers
-#+begin_src emacs-lisp
-  (use-package ivy
-    :diminish ivy-mode
-    :config
-    (setq ivy-use-selectable-prompt t)
-    (ivy-mode 1))
 
-
-  (define-key ivy-minibuffer-map (kbd "C-w") 'backward-kill-word)
-#+end_src
 *** Helm
-Some package require helm to work.
-This is not used most of the time.
+Enable better minibuffer completions.
+
 #+begin_src emacs-lisp
   (use-package helm
     :config
-    (helm-mode nil))
+    (global-set-key (kbd "M-x") #'helm-M-x)
+    (global-set-key (kbd "C-x C-f") #'helm-find-files)
+    (helm-mode 1)
+
+    (bind-key (kbd "C-w") 'backward-kill-word helm-map)
+    (bind-key "<escape>" 'helm-keyboard-quit helm-map))
+
   (use-package helm-org)
 #+end_src
 *** Eye-browse
@@ -208,14 +203,6 @@ Use Doom emacs themes
 
 **** Look
 #+begin_src emacs-lisp
-  (use-package ivy-posframe
-    :diminish ivy-posframe-mode
-    :config
-    (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-point)))
-    (ivy-posframe-mode 1))
-#+end_src
-
-#+begin_src emacs-lisp
   (use-package doom-modeline
     :init (doom-modeline-mode 1))
 #+end_src
@@ -290,15 +277,15 @@ setting this up.
   ;; Evil leader has to be loaded before Evil to work in initial buffers.
   (use-package evil-leader)
 
-  (define-key evil-normal-state-map (kbd "C-f") 'find-file)
+  (define-key evil-normal-state-map (kbd "C-f") 'helm-find-files)
   (evil-leader/set-leader "<SPC>")
   (evil-leader/set-key
     "w" 'save-buffer
     "o" 'delete-other-windows
-    "f" 'find-file
+    "f" 'helm-find-files
     "g" 'magit-status
     "h" 'evil-ex-nohighlight
-    "b" 'ivy-switch-buffer
+    "b" 'helm-buffers-list
     "t" 'vterm-toggle
     "d" 'olivetti-mode)
 
@@ -381,7 +368,8 @@ Set up the basic settings of org-mode.
     (setq sentence-end-double-space nil)
     (add-hook 'org-mode-hook 'org-indent-mode)
     (eval-after-load 'org-indent '(diminish 'org-indent-mode))
-    (setq org-hide-emphasis-markers t))
+    (setq org-hide-emphasis-markers t)
+    (setq org-startup-folded nil))
 
   (require 'org-tempo)
 #+END_SRC
