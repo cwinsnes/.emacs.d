@@ -115,6 +115,7 @@ Enable better minibuffer completions.
     :config
     (global-set-key (kbd "M-x") #'helm-M-x)
     (global-set-key (kbd "C-x C-f") #'helm-find-files)
+    (setq helm-ff-skip-boring-files 1)
     (helm-mode 1)
 
     (bind-key (kbd "C-w") 'backward-kill-word helm-map)
@@ -210,17 +211,6 @@ Use Doom emacs themes
 #+begin_src emacs-lisp
 (setq display-time-format "%H:%M")
 #+end_src
-** LibVTerm
-Adding a proper terminal into emacs. This package requires
-=libtool-bin= and =cmake > 3.11= to work properly.
-
-If =M-x vterm= is run, libvterm will be installed automatically using
-the required tools.
-#+begin_src emacs-lisp
-(use-package vterm)
-(defalias 'terminal 'vterm)
-#+end_src
-
 ** evil-mode - Vim key bindings
 Start by unbinding keys that might interfere later.
 #+BEGIN_SRC emacs-lisp
@@ -530,6 +520,15 @@ Completion engine for several languages
             company-idle-delay 0.5)
       (company-tng-configure-default))
 #+END_SRC
+*** Snippets
+#+begin_src emacs-lisp
+  (use-package yasnippet
+    :config
+    (yas-global-mode 1))
+
+  (use-package yasnippet-snippets)
+#+end_src
+
 *** Tags
 Make tags work better in Emacs and auto use the correct files.
 Will fallback to ripgrep if no tags file is found.
