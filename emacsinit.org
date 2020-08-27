@@ -553,16 +553,10 @@ Will fallback to ripgrep if no tags file is found.
       (define-key evil-normal-state-map (kbd "C-]") 'counsel-etags-find-tag-at-point))
 #+end_src
 
-*** Eglot
+*** LSP-mode
 Language server protocol. Works with company-mode!
 
 #+begin_src emacs-lisp
-  ;; (use-package eglot
-  ;;   :config
-  ;;   (add-hook 'latex-mode-hook 'eglot-ensure)
-  ;;   (add-hook 'python-mode-hook 'eglot-ensure)
-  ;;   (add-hook 'c-mode-hook 'eglot-ensure))
-
   (use-package lsp-mode
     :hook
     (python-mode . lsp-deferred)
