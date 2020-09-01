@@ -209,7 +209,34 @@ Use Doom emacs themes
 #+end_src
 
 #+begin_src emacs-lisp
-(setq display-time-format "%H:%M")
+  (setq display-time-format "%H:%M")
+#+end_src
+
+Make delimiters have matched rainbow colors for easier distinguishing.
+#+begin_src emacs-lisp
+  (use-package rainbow-delimiters
+    :config
+    (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
+#+end_src
+
+Make identifiers have unique colors in supported modes.
+#+begin_src emacs-lisp
+  (use-package color-identifiers-mode
+    :config
+    (add-hook 'after-init-hook 'global-color-identifiers-mode))
+#+end_src
+**** Cursor tracking
+Ways of making sure it is obvious which window is active and where the cursor is.
+#+begin_src emacs-lisp
+  (use-package beacon
+    :config
+    (beacon-mode 1))
+
+  (use-package dimmer
+    :config
+    (dimmer-configure-company-box)
+    (dimmer-configure-helm)
+    (dimmer-mode t))
 #+end_src
 ** evil-mode - Vim key bindings
 Start by unbinding keys that might interfere later.
