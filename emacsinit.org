@@ -320,6 +320,14 @@ While it may not be used much it can be very handy sometimes.
     :config
     (global-git-gutter-mode 1))
 #+end_src
+*** Project management
+Use projectile to easily find and search within projects.
+#+begin_src emacs-lisp
+  (use-package projectile
+    :config
+    (projectile-mode 1)
+    (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
+#+end_src
 *** Persistent undo
 Allows for using undo between session. Note that saving history to disk risks leaking information.
 #+begin_src emacs-lisp
