@@ -272,19 +272,27 @@ on last window of current tab.
 **** Add key bindings for Evil in different modes
 
 #+begin_src emacs-lisp
-  (use-package evil-org
-    :after evil)
+    (use-package evil-org
+      :ensure t
+      :after org
+      :config
+      (add-hook 'org-mode-hook 'evil-org-mode)
+      (add-hook 'evil-org-mode-hook
+                (lambda ()
+                  (evil-org-set-key-theme)))
+      (require 'evil-org-agenda)
+      (evil-org-agenda-set-keys))
 
-  (use-package evil-collection
-    :after evil
-    :config
-    (evil-collection-init))
+    (use-package evil-collection
+      :after evil
+      :config
+      (evil-collection-init))
 
-  (use-package evil-magit
-    :after evil
-    :config
-    (evil-ex-define-cmd "GCommit" 'magit-commit)
-    (evil-ex-define-cmd "GAdd" 'magit-stage-file))
+    (use-package evil-magit
+      :after evil
+      :config
+      (evil-ex-define-cmd "GCommit" 'magit-commit)
+      (evil-ex-define-cmd "GAdd" 'magit-stage-file))
 #+END_SRC
 **** Evil Leader key
 Add a leader key to evil, and set its bindings.  Yes, this is the same
@@ -397,6 +405,33 @@ Set up the basic settings of org-mode.
     (setq org-startup-folded nil))
 
   (require 'org-tempo)
+  (setq org-agenda-files (file-expand-wildcards "~/org/*.org"))
+
+  (use-package org-ql
+    :config
+    (setq org-agenda-custom-commands
+          '(("cts" "All tags and ToDos"
+             ((org-ql-block '(or (todo "TODO")
+                                 (todo "DOING")
+                                 (tags))
+                            ((org-ql-block-header "Agenda"))))))))
+
+  (use-package org-super-agenda
+    :config
+    (setq org-super-agenda-groups
+          '((:name "TODOs"
+                   :todo "TODO"
+                   :todo "DOING")
+            (:name "Results"
+                   :tag "results"
+                   :tag "resul")
+            (:auto-tags t)))
+    (define-key org-super-agenda-header-map "k" 'org-agenda-previous-line)
+    (define-key org-super-agenda-header-map "j" 'org-agenda-next-line)
+    (org-super-agenda-mode 1))
+
+  ;; Bind the key to bind together the org-agenda stuff
+  (global-set-key (kbd "C-c a") (lambda () (interactive) (org-agenda nil "cts")))
 #+END_SRC
 
 Prettify the way headlines and such look
@@ -497,33 +532,6 @@ Do not prettify current line.
   (define-key org-mode-map (kbd "C-c n a") 'org-insert-link)
 #+end_src
 
-**** Org-roam
-Org-roam allows for backlinking notes.
-#+BEGIN_SRC emacs-lisp
-;;   (use-package org-roam
-;;     :diminish org-roam-mode
-;;     :hook
-;;     (after-init . org-roam-mode)
-;;     :config
-;;     (setq org-roam-directory (expand-file-name "~/org/"))
-;;     (setq org-roam-index-file "~/org/index.org")
-;;     (setq org-roam-graph-viewer nil)
-;;     :bind (:map org-roam-mode-map
-;;                 (("C-c n l" . org-roam)
-;;                  ("C-c n n" . org-roam-jump-to-index)
-;;                  ("C-c n f" . org-roam-find-file)
-;;                  ("C-c n g" . org-roam-graph))
-;;                 :map org-mode-map
-;;                 (("C-c n i" . org-roam-insert))
-;;                 (("C-c n I" . org-roam-insert-immediate))))
-;;
-;;   (setq org-roam-capture-templates
-;;         '(("d" "default" plain (function org-roam--capture-get-point)
-;;           "%?"
-;;           :file-name "%<%Y%m%d>-${slug}"
-;;           :head "#+title: ${title}\n#+roam_alias: ${title}\n#+roam_key: cite:${title}\n#+roam_tags: ${title}\n\n"
-;;           :unnarrowed t)))
-#+END_SRC
 *** Markdown
 #+begin_src emacs-lisp
   (setq markdown-fontify-code-blocks-natively t)
