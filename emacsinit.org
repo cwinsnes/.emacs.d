@@ -182,10 +182,10 @@ If the fonts are not already installed, install that as well.
 #+END_SRC
 
 #+begin_src emacs-lisp
-    (use-package emacs
-      :init
-      (set-face-attribute 'default nil :font "DejaVu Sans Mono-10" )
-      (set-frame-font "Dejavu Sans Mono-10" nil t))
+  (use-package emacs
+    :init
+    (set-face-attribute 'default nil :font "DejaVu Sans Mono-10" )
+    (set-frame-font "Dejavu Sans Mono-10" nil t))
 #+end_src
 
 **** Themes
@@ -198,7 +198,6 @@ Use Doom emacs themes
     (load-theme 'doom-gruvbox t)
     (setq doom-themes-neotree-file-icons t)
     (doom-themes-neotree-config)
-
     (doom-themes-org-config))
 #+END_SRC
 
@@ -576,24 +575,25 @@ Completion engine for several languages
 Make tags work better in Emacs and auto use the correct files.
 Will fallback to ripgrep if no tags file is found.
 #+begin_src emacs-lisp
-    (use-package counsel-etags
-      :bind (("C-]" . counsel-etags-find-tag-at-point))
-      :init
-      ;; Don't ask before rereading the TAGS files if they have changed
-      (setq tags-revert-without-query t)
-      ;; Don't warn when TAGS files are large
-      (setq large-file-warning-threshold nil)
-      (add-hook 'prog-mode-hook
-                (lambda ()
-                  (add-hook 'after-save-hook
-                            'counsel-etags-virtual-update-tags 'append 'local)))
-      :config
-      (setq counsel-etags-update-interval 60)
-      (add-to-list 'counsel-etags-ignore-directories "build"))
+  (use-package counsel-etags
+    :bind (("C-]" . counsel-etags-find-tag-at-point))
+    :init
+    ;; Don't ask before rereading the TAGS files if they have changed
+    (setq tags-revert-without-query t)
+    (setq tags-add-table nil)
+    ;; Don't warn when TAGS files are large
+    (setq large-file-warning-threshold nil)
+    (add-hook 'prog-mode-hook
+              (lambda ()
+                (add-hook 'after-save-hook
+                          'counsel-etags-virtual-update-tags 'append 'local)))
+    :config
+    (setq counsel-etags-update-interval 60)
+    (add-to-list 'counsel-etags-ignore-directories "build"))
 
-    ;; Bind tag finding to normal key in evil mode
-    (with-eval-after-load 'evil-maps
-      (define-key evil-normal-state-map (kbd "C-]") 'counsel-etags-find-tag-at-point))
+  ;; Bind tag finding to normal key in evil mode
+  (with-eval-after-load 'evil-maps
+    (define-key evil-normal-state-map (kbd "C-]") 'counsel-etags-find-tag-at-point))
 #+end_src
 
 *** LSP-mode
