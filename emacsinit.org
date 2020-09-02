@@ -530,6 +530,13 @@ Do not prettify current line.
   (define-key org-mode-map (kbd "C-c n a") 'org-insert-link)
 #+end_src
 
+**** Org-transclusion
+Add tranclusion ability to org files
+#+begin_src emacs-lisp
+  (use-package org-transclusion
+    :straight (org-transclusion :type git :host github :repo "cwinsnes/org-transclusion"))
+#+end_src
+
 *** Markdown
 #+begin_src emacs-lisp
   (setq markdown-fontify-code-blocks-natively t)
