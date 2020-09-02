@@ -360,6 +360,7 @@ Use projectile to easily find and search within projects.
   (use-package projectile
     :config
     (projectile-mode 1)
+    (define-key evil-normal-state-map (kbd "C-p") 'projectile-command-map)
     (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
 #+end_src
 *** Persistent undo
