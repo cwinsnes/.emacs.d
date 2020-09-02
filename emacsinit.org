@@ -405,7 +405,13 @@ Set up the basic settings of org-mode.
 
   (require 'org-tempo)
   (setq org-agenda-files (file-expand-wildcards "~/org/*.org"))
+#+end_src
 
+Add a search system for org tags and such. As I tend not to use the
+date function in Org too much, the default agenda is pretty useless.
+Use this system to include any TODO/DOING task and ANY headline with a
+tag.
+#+BEGIN_SRC emacs-lisp
   (use-package org-ql
     :config
     (setq org-agenda-custom-commands
@@ -414,23 +420,27 @@ Set up the basic settings of org-mode.
                                  (todo "DOING")
                                  (tags))
                             ((org-ql-block-header "Agenda"))))))))
+#+END_SRC
 
-  (use-package org-super-agenda
-    :config
-    (setq org-super-agenda-groups
-          '((:name "TODOs"
-                   :todo "TODO"
-                   :todo "DOING")
-            (:name "Results"
-                   :tag "results"
-                   :tag "resul")
-            (:auto-tags t)))
-    (define-key org-super-agenda-header-map "k" 'org-agenda-previous-line)
-    (define-key org-super-agenda-header-map "j" 'org-agenda-next-line)
-    (org-super-agenda-mode 1))
+Then use org-super agenda to filter through the results of the search.
+#+BEGIN_SRC emacs-lisp
+    (use-package org-super-agenda
+      :config
+      (setq org-super-agenda-groups
+            '((:discard (:tag ("ignore")))
+              (:name "TODOs"
+                     :todo "TODO"
+                     :todo "DOING")
+              (:name "Results"
+                     :tag "results"
+                     :tag "result")
+              (:auto-tags t)))
+      (define-key org-super-agenda-header-map "k" 'org-agenda-previous-line)
+      (define-key org-super-agenda-header-map "j" 'org-agenda-next-line)
+      (org-super-agenda-mode 1))
 
-  ;; Bind the key to bind together the org-agenda stuff
-  (global-set-key (kbd "C-c a") (lambda () (interactive) (org-agenda nil "cts")))
+    ;; Bind the key to bind together the org-agenda stuff
+    (global-set-key (kbd "C-c a") (lambda () (interactive) (org-agenda nil "cts")))
 #+END_SRC
 
 Prettify the way headlines and such look
@@ -580,7 +590,7 @@ Will fallback to ripgrep if no tags file is found.
     :init
     ;; Don't ask before rereading the TAGS files if they have changed
     (setq tags-revert-without-query t)
-    (setq tags-add-table nil)
+    (setq tags-add-tables nil)
     ;; Don't warn when TAGS files are large
     (setq large-file-warning-threshold nil)
     (add-hook 'prog-mode-hook
