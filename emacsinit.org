@@ -53,12 +53,22 @@ Needs to be done here because it is used by use-package in configurations.
 
   ;; Create backup dir instead of having backupfiles everywhere.
   ;; Not sure how much this actually does.
-  (setq backup-directory-alist `(("." . "~/.emacs.d/saves")))
-  (setq backup-by-copying t)
-  (setq delete-old-versions t
-    kept-new-versions 6
-    kept-old-versions 2
-    version-control t)
+  (let ((autosavedir "~/.emacs.d/saves/")
+        (backup-dir "~/.emacs.d/backups/"))
+    (dolist (dir (list autosavedir backup-dir))
+      (when (not (file-directory-p dir))
+        (make-directory dir t)))
+    (setq backup-directory-alist `(("." . ,backup-dir))
+          auto-save-file-name-transforms `((".*" ,autosavedir t))
+          auto-save-list-file-prefix (concat autosavedir ".saves-")
+          tramp-backup-directory-alist `((".*" . ,backup-dir))
+          tramp-auto-save-directory autosavedir))
+
+  (setq backup-by-copying t
+        delete-old-versions t
+        kept-new-versions 6
+        kept-old-versions 2
+        version-control t)
 
   ;; Make sure that garbage collection is much higher than default
   ;; Important for LSP-mode
@@ -81,6 +91,7 @@ Remove trailing whitespace upon save
   (use-package emacs
     :ensure nil
     :config
+
     (global-auto-revert-mode)
     (diminish 'auto-revert-mode))
 #+END_SRC
