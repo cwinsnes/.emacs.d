@@ -545,7 +545,9 @@ Do not prettify current line.
 Add tranclusion ability to org files
 #+begin_src emacs-lisp
   (use-package org-transclusion
-    :straight (org-transclusion :type git :host github :repo "cwinsnes/org-transclusion"))
+    :straight (org-transclusion :type git :host github :repo "cwinsnes/org-transclusion")
+    :config
+    (add-hook 'org-mode-hook 'org-transclusion-mode))
 #+end_src
 
 *** Markdown
@@ -555,6 +557,14 @@ Add tranclusion ability to org files
 *** Python
 #+begin_src emacs-lisp
 (setq python-shell-interpreter "python3")
+#+end_src
+*** Rust
+Enable rust syntax highlighting and such.
+#+begin_src emacs-lisp
+  (use-package rust-mode
+    :config
+    (setq rust-format-on-save t)
+    (define-key rust-mode-map (kbd "C-c C-c") 'rust-compile))
 #+end_src
 ** General coding plugins
 *** Error checking
@@ -620,6 +630,7 @@ Language server protocol. Works with company-mode!
   (use-package lsp-mode
     :hook
     (python-mode . lsp-deferred)
+    (rust-mode . lsp-deferred)
     :commands
     (lsp lsp-deferred)
     :config
