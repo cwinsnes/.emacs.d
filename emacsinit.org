@@ -568,13 +568,12 @@ Enable rust syntax highlighting and such.
 #+end_src
 ** General coding plugins
 *** Error checking
-Enable error checking for moded that are not covered by Eglot later.
 #+begin_src emacs-lisp
-  (use-package flymake
+  (use-package flycheck
     :config
-    (define-key evil-normal-state-map (kbd "M-m") 'flymake-goto-next-error)
-    (define-key evil-normal-state-map (kbd "M-n") 'flymake-goto-prev-error)
-    (add-hook 'emacs-lisp-mode-hook 'flymake-mode nil t))
+    (global-flycheck-mode)
+    (define-key evil-normal-state-map (kbd "M-m") 'flycheck-next-error)
+    (define-key evil-normal-state-map (kbd "M-n") 'flycheck-previous-error))
 #+end_src
 *** Company mode
 Completion engine for several languages
