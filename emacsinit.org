@@ -556,7 +556,18 @@ Add tranclusion ability to org files
 #+end_src
 *** Python
 #+begin_src emacs-lisp
-(setq python-shell-interpreter "python3")
+  (setq python-shell-interpreter "python3")
+  (if (executable-find "black")
+    (use-package blacken
+      :hook
+      (python-mode . blacken-mode))
+    (warn "Could not find black"))
+
+  (if (executable-find "isort")
+    (use-package py-isort
+      :after python
+      :hook ((before-save . py-isort-before-save)))
+    (warn "Could not find isort"))
 #+end_src
 *** Rust
 Enable rust syntax highlighting and such.
@@ -636,11 +647,16 @@ Language server protocol. Works with company-mode!
     (setq lsp-completion-provider :capf
           lsp-diagnostics-provider :flycheck)
     (setq lsp-idle-delay 0.2)
+    ;; Python settings
+    (setq lsp-pyls-plugins-pydocstyle-enabled t)
+
     (lsp-register-client
      (make-lsp-client :new-connection (lsp-tramp-connection "pyls")
                       :major-modes '(python-mode)
                       :remote? t
                       :server-id 'pyls-remote)))
 
-  (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
+  (use-package lsp-ui
+    :config
+    (setq lsp-ui-doc-position 'bottom))
 #+end_src
