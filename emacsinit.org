@@ -578,15 +578,15 @@ Enable rust syntax highlighting and such.
 *** Company mode
 Completion engine for several languages
 #+BEGIN_SRC emacs-lisp
-    (use-package company
-      :diminish company-mode
-      :config
-      (add-to-list 'company-backends 'company-capf)
-      (add-hook 'after-init-hook 'global-company-mode)
-      (setq company-minimum-prefix-length 1
-            company-dabbrev-downcase 0
-            company-idle-delay 0.5)
-      (company-tng-configure-default))
+  (use-package company
+    :diminish company-mode
+    :config
+    (add-to-list 'company-backends 'company-capf)
+    (add-hook 'after-init-hook 'global-company-mode)
+    (setq company-minimum-prefix-length 1
+          company-dabbrev-downcase 0
+          company-idle-delay 0.0)
+    (company-tng-configure-default))
 #+END_SRC
 *** Snippets
 #+begin_src emacs-lisp
@@ -633,7 +633,8 @@ Language server protocol. Works with company-mode!
     :commands
     (lsp lsp-deferred)
     :config
-    (setq lsp-completion-provider :capf)
+    (setq lsp-completion-provider :capf
+          lsp-diagnostics-provider :flycheck)
     (setq lsp-idle-delay 0.2)
     (lsp-register-client
      (make-lsp-client :new-connection (lsp-tramp-connection "pyls")
