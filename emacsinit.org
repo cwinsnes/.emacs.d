@@ -364,6 +364,17 @@ Also define a couple of new surrounds.
 #+end_src
 
 ** File management
+*** Unique buffer names
+When working with buffers that have the same name, make emacs display
+them using forward style instead of the default post-forward.
+
+#+begin_src emacs-lisp
+  (setq-default uniquify-buffer-name-style 'forward
+                uniquify-separator "/")
+
+  (setq-default uniquify-after-kill-buffer-p t)
+  (setq-default uniquify-ignore-buffers-re "^\\*")
+#+end_src
 *** Neotree
 Add a file browser system to emacs.
 While it may not be used much it can be very handy sometimes.
@@ -408,6 +419,7 @@ Allows for using undo between session. Note that saving history to disk risks le
     :config
     (add-to-list 'tramp-remote-path "/snap/bin"))
 #+end_src
+
 ** File types and languages
 *** Org-mode
 Set up the basic settings of org-mode.
