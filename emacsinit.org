@@ -194,11 +194,45 @@ Use Doom emacs themes
     :config
     (setq doom-themes-enable-bold t
           doom-themes-enable-italic t)
-    (load-theme 'doom-gruvbox t)
     (setq doom-themes-neotree-file-icons t)
     (doom-themes-neotree-config)
     (doom-themes-org-config))
 #+END_SRC
+
+***** Theme toggling
+The theme toggling code courtesy of Ivan in a [[https://emacs.stackexchange.com/questions/24088/make-a-function-to-toggle-themes][StackOverflow thread]].
+
+Start by setting which themes can be cycled through.
+#+begin_src emacs-lisp
+  (setq ivan/themes '(doom-one-light doom-gruvbox))
+#+end_src
+
+Then define cycling code.
+#+begin_src emacs-lisp
+  (setq ivan/themes-index 0)
+
+  (defun ivan/cycle-theme (&optional newindex)
+    (interactive)
+    (when newindex
+      (setq ivan/themes-index newindex))
+    (setq ivan/themes-index (% (1+ ivan/themes-index) (length ivan/themes)))
+    (ivan/load-indexed-theme))
+
+  (defun ivan/load-indexed-theme ()
+    (ivan/try-load-theme (nth ivan/themes-index ivan/themes)))
+
+  (defun ivan/try-load-theme (theme)
+    (if (ignore-errors (load-theme theme :no-confirm))
+        (mapcar #'disable-theme (remove theme custom-enabled-themes))
+      (message "Unable to find theme file for ‘%s’" theme)))
+
+  (global-set-key [f10] 'ivan/cycle-theme)
+#+end_src
+
+And finally enable the first theme in the list.
+#+begin_src emacs-lisp
+  (ivan/cycle-theme (- 1 (length ivan/themes)))
+#+end_src
 
 **** Look
 #+begin_src emacs-lisp
