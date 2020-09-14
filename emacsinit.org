@@ -425,67 +425,115 @@ Allows for using undo between session. Note that saving history to disk risks le
 Set up the basic settings of org-mode.
 #+BEGIN_SRC emacs-lisp
   (use-package org
-    :ensure nil
-    :config
-    (custom-set-faces
-     '(org-headline-done
-       ((((class color) (min-colors 16))
-         (:foreground "light gray")))))
+      :ensure nil
+      :config
+      ;; Due to some bug, these are not always set properly.
+      ;; Re-set them here to avoid any issue.
+      (defvaralias 'org-priority-highest 'org-highest-priority)
+      (defvaralias 'org-priority-lowest 'org-lowest-priority)
 
-    (setq org-fontify-done-headline t)
-    (setq org-todo-keywords
-      '((sequence "TODO(t)" "DOING(o)" "|" "DONE(d)")
-        (sequence "|" "CANCELED(c)")))
-    (setq org-todo-keyword-faces
-      '(("TODO" . (:foreground "red" :weight bold))
-        ("DOING" . "yellow")
-        ("DONE" . (:foreground "green" :weight bold))
-        ("CANCELED" . (:foreground "gray" :weight bold))))
-    ;; Make single space end sentences.
-    (setq sentence-end-double-space nil)
-    (add-hook 'org-mode-hook 'org-indent-mode)
-    (eval-after-load 'org-indent '(diminish 'org-indent-mode))
-    (setq org-hide-emphasis-markers t)
-    (setq org-startup-folded nil))
+      ;; Continue with customization
+      (custom-set-faces
+       '(org-headline-done
+         ((((class color) (min-colors 16))
+           (:foreground "light gray")))))
 
-  (require 'org-tempo)
-  (setq org-agenda-files (file-expand-wildcards "~/org/*.org"))
+      (setq org-fontify-done-headline t)
+      (setq org-todo-keywords
+        '((sequence "TODO(t)" "DOING(o)" "|" "DONE(d)")
+          (sequence "MEETING(m)" "|")
+          (sequence "IDEA(i)" "|")
+          (sequence "NEXT(n)" "|")
+          (sequence "|" "CANCELED(c)")))
+      (setq org-todo-keyword-faces
+        '(("TODO" . (:foreground "red" :weight bold))
+          ("NEXT" . (:foreground "red" :weight bold))
+          ("DOING" . "yellow")
+          ("DONE" . (:foreground "green" :weight bold))
+          ("MEETING" . (:foreground "blue" :weight bold))
+          ("IDEA" . (:foreground "purple" :weight bold))
+          ("CANCELED" . (:foreground "gray" :weight bold))))
+      ;; Make single space end sentences.
+      (setq sentence-end-double-space nil)
+      (add-hook 'org-mode-hook 'org-indent-mode)
+      (eval-after-load 'org-indent '(diminish 'org-indent-mode))
+      (setq org-hide-emphasis-markers t)
+      (setq org-startup-folded nil)
+      (setq org-refile-targets (quote ((nil :maxlevel . 9)
+                                       (org-agenda-files :maxlevel . 9)))))
+
+    (require 'org-tempo)
+    (setq org-agenda-files (file-expand-wildcards "~/org/*.org"))
 #+end_src
 
-Add a search system for org tags and such. As I tend not to use the
-date function in Org too much, the default agenda is pretty useless.
-Use this system to include any TODO/DOING task and ANY headline with a
-tag.
+Setup new capture templates.
+#+begin_src emacs-lisp
+  (setq org-capture-templates
+         '(("t" "todo" entry (file org-default-notes-file)
+            "* TODO %?\n%t\n%a\n\n")
+           ("m" "Meeting" entry (file org-default-notes-file)
+            "* MEETING with %? :MEETING:\n%t")
+           ("i" "Idea" entry (file org-default-notes-file)
+            "* IDEA %? :IDEA: \n")
+           ("n" "Next Task" entry (file+headline org-default-notes-file "Tasks")
+            "** NEXT %? \nDEADLINE: %t\n") ))
+
+  ;; Make sure that we can use the captures
+  (global-set-key (kbd "C-c c") 'org-capture)
+
+  ;; And set the default notes file to be in another location
+  ;; Use the index.org from org-wiki to store such things
+  (setq org-default-notes-file "~/org/index.org")
+#+end_src
+
+Add a search system for org tags and such. Use this system to include
+any TODO/DOING task and ANY headline with a tag.
 #+BEGIN_SRC emacs-lisp
   (use-package org-ql
     :config
-    (setq org-agenda-custom-commands
-          '(("cts" "All tags and ToDos"
-             ((org-ql-block '(or (todo "TODO")
-                                 (todo "DOING")
-                                 (tags))
-                            ((org-ql-block-header "Agenda"))))))))
+
+  (setq org-agenda-custom-commands
+        '(("cav" "Custom Agenda View"
+           ((agenda)
+            (org-ql-block '(or (todo "TODO")
+                               (tags "TODO")
+                               (tags "todo"))
+                          ((org-ql-block-header "")))
+           (org-ql-block '(or (todo "IDEA")
+                               (tags "IDEA")
+                               (tags "idea"))
+                         ((org-ql-block-header "Someday:")))))))
 #+END_SRC
 
 Then use org-super agenda to filter through the results of the search.
 #+BEGIN_SRC emacs-lisp
-    (use-package org-super-agenda
-      :config
-      (setq org-super-agenda-groups
-            '((:discard (:tag ("ignore")))
-              (:name "TODOs"
-                     :todo "TODO"
-                     :todo "DOING")
-              (:name "Results"
-                     :tag "results"
-                     :tag "result")
-              (:auto-tags t)))
-      (define-key org-super-agenda-header-map "k" 'org-agenda-previous-line)
-      (define-key org-super-agenda-header-map "j" 'org-agenda-next-line)
-      (org-super-agenda-mode 1))
+  (use-package org-super-agenda
+    :config
+    (setq org-super-agenda-groups
+          '((:discard (:tag ("ignore")))
+            (:name ""
+                    :time-grid t)
+            (:name "Meetings"
+                   :todo "MEETING"
+                   :tag "MEETING")
+            (:name "TODOs"
+                   :time-grid t
+                   :todo "TODO"
+                   :todo "DOING")
+            (:name "IDEAs"
+                   :todo "IDEA"
+                   :tag "IDEA"
+                   :order 9)
+            (:name "Results"
+                   :tag "results"
+                   :tag "result")
+            (:auto-tags t)))
+    (define-key org-super-agenda-header-map "k" 'org-agenda-previous-line)
+    (define-key org-super-agenda-header-map "j" 'org-agenda-next-line)
+    (org-super-agenda-mode 1))
 
-    ;; Bind the key to bind together the org-agenda stuff
-    (global-set-key (kbd "C-c a") (lambda () (interactive) (org-agenda nil "cts")))
+  ;; Bind the key to bind together the org-agenda stuff
+  (global-set-key (kbd "C-c a") (lambda () (interactive) (org-agenda nil "cav")))
 #+END_SRC
 
 Prettify the way headlines and such look
