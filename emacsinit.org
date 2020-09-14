@@ -677,6 +677,13 @@ Completion engine for several languages
     (yas-global-mode 1))
 
   (use-package yasnippet-snippets)
+
+  ;; Expand with yasnippet only if Company didn't complete the word before
+  (defvar my-company-point nil)
+  (advice-add 'company-complete-common :before (lambda () (setq my-company-point (point))))
+  (advice-add 'company-complete-common :after (lambda ()
+                                                  (when (equal my-company-point (point))
+                                                    (yas-expand))))
 #+end_src
 
 *** Tags
