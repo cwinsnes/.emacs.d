@@ -340,6 +340,7 @@ setting this up.
     "w" 'save-buffer
     "o" 'delete-other-windows
     "f" 'helm-find-files
+    "t" 'counsel-etags-virtual-update-tags
     "g" 'magit-status
     "h" 'evil-ex-nohighlight
     "b" 'helm-buffers-list
