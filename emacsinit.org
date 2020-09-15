@@ -425,17 +425,11 @@ Allows for using undo between session. Note that saving history to disk risks le
 *** Org-mode
 Set up the basic settings of org-mode.
 #+BEGIN_SRC emacs-lisp
+  (straight-override-recipe
+     '(org :type git :host github :repo "emacsmirror/org" :no-build t))
   (use-package org
       :ensure nil
       :config
-      ;; Due to some bug, these are not always set properly.
-      ;; Re-set them here to avoid any issue.
-      (unless (boundp 'org-priority-highest)
-        (defvaralias 'org-priority-highest 'org-highest-priority))
-      (unless (boundp 'org-priority-lowest)
-        (defvaralias 'org-priority-lowest 'org-lowest-priority))
-
-      ;; Continue with customization
       (custom-set-faces
        '(org-headline-done
          ((((class color) (min-colors 16))
@@ -445,14 +439,16 @@ Set up the basic settings of org-mode.
       (setq org-todo-keywords
         '((sequence "TODO(t)" "DOING(o)" "|" "DONE(d)")
           (sequence "MEETING(m)" "|")
-          (sequence "IDEA(i)" "|")
-          (sequence "NOTE(e)" "|")
-          (sequence "NEXT(n)" "|")
+          (sequence "IDEA" "|")
+          (sequence "NOTE" "|")
+          (sequence "EVENT(e)" "|")
+          (sequence "NEXT" "|")
           (sequence "|" "CANCELED(c)")))
       (setq org-todo-keyword-faces
         '(("TODO" . (:foreground "red" :weight bold))
           ("NEXT" . (:foreground "red" :weight bold))
           ("DOING" . "yellow")
+          ("EVENT" . (:foreground "orange" :weight bold))
           ("DONE" . (:foreground "green" :weight bold))
           ("MEETING" . (:foreground "blue" :weight bold))
           ("IDEA" . (:foreground "purple" :weight bold))
@@ -480,6 +476,8 @@ Setup new capture templates.
             "* MEETING with %? :MEETING:\n%t")
            ("i" "Idea" entry (file org-default-notes-file)
             "* IDEA %? :IDEA: \n")
+           ("e" "Event" entry (file org-default-notes-file)
+            "* EVENT %? :EVENT: \n%t\n")
            ("n" "New note" entry (file+headline org-default-notes-file "Quick notes")
             "** NOTE %? \n%t\n")
            ("e" "Next Task" entry (file+headline org-default-notes-file "Tasks")
@@ -506,7 +504,10 @@ any TODO/DOING task and ANY headline with a tag.
                                  (tags "TODO")
                                  (tags "NEXT")
                                  (tags "todo"))
-                            ((org-ql-block-header "")))
+                            ((org-ql-block-header "To do")))
+              (org-ql-block '(or (todo "EVENT")
+                                 (tags "EVENT"))
+                            ((org-ql-block-header "Events")))
               (org-ql-block '(or (todo "IDEA")
                                  (tags "IDEA")
                                  (tags "idea"))
