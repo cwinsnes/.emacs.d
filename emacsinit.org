@@ -429,8 +429,10 @@ Set up the basic settings of org-mode.
       :config
       ;; Due to some bug, these are not always set properly.
       ;; Re-set them here to avoid any issue.
-      (defvaralias 'org-priority-highest 'org-highest-priority)
-      (defvaralias 'org-priority-lowest 'org-lowest-priority)
+      (unless (boundp 'org-priority-highest)
+        (defvaralias 'org-priority-highest 'org-highest-priority))
+      (unless (boundp 'org-priority-lowest)
+        (defvaralias 'org-priority-lowest 'org-lowest-priority))
 
       ;; Continue with customization
       (custom-set-faces
@@ -443,6 +445,7 @@ Set up the basic settings of org-mode.
         '((sequence "TODO(t)" "DOING(o)" "|" "DONE(d)")
           (sequence "MEETING(m)" "|")
           (sequence "IDEA(i)" "|")
+          (sequence "NOTE(e)" "|")
           (sequence "NEXT(n)" "|")
           (sequence "|" "CANCELED(c)")))
       (setq org-todo-keyword-faces
@@ -452,6 +455,7 @@ Set up the basic settings of org-mode.
           ("DONE" . (:foreground "green" :weight bold))
           ("MEETING" . (:foreground "blue" :weight bold))
           ("IDEA" . (:foreground "purple" :weight bold))
+          ("NOTE" . (:foreground "purple" :weight bold))
           ("CANCELED" . (:foreground "gray" :weight bold))))
       ;; Make single space end sentences.
       (setq sentence-end-double-space nil)
@@ -475,7 +479,9 @@ Setup new capture templates.
             "* MEETING with %? :MEETING:\n%t")
            ("i" "Idea" entry (file org-default-notes-file)
             "* IDEA %? :IDEA: \n")
-           ("n" "Next Task" entry (file+headline org-default-notes-file "Tasks")
+           ("n" "New note" entry (file+headline org-default-notes-file "Quick notes")
+            "** NOTE %? \n%t\n")
+           ("e" "Next Task" entry (file+headline org-default-notes-file "Tasks")
             "** NEXT %? \nDEADLINE: %t\n") ))
 
   ;; Make sure that we can use the captures
