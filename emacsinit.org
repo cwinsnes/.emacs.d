@@ -471,7 +471,7 @@ Setup new capture templates.
 #+begin_src emacs-lisp
   (setq org-capture-templates
          '(("t" "todo" entry (file org-default-notes-file)
-            "* TODO %?\n%t\n%a\n\n")
+            "* TODO %?\nDEADLINE: %t\n%a\n\n")
            ("m" "Meeting" entry (file org-default-notes-file)
             "* MEETING with %? :MEETING:\n%t")
            ("i" "Idea" entry (file org-default-notes-file)
@@ -639,7 +639,8 @@ Do not prettify current line.
   (global-set-key (kbd "C-c n f") 'org-wiki-helm)
   (global-set-key (kbd "C-c n w") 'org-wiki-index)
   (define-key org-mode-map (kbd "C-c n i") 'org-wiki-insert-link)
-  (define-key org-mode-map (kbd "C-c n n") 'org-wiki-insert-new)
+  (define-key org-mode-map (kbd "C-c n m") 'org-wiki-insert-new)
+  (define-key org-mode-map (kbd "C-c n n") 'org-wiki-new)
   (define-key org-mode-map (kbd "C-c n a") 'org-insert-link)
 #+end_src
 
