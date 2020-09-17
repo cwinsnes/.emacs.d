@@ -27,6 +27,17 @@ Needs to be done here because it is used by use-package in configurations.
 #+BEGIN_SRC emacs-lisp
   (use-package diminish)
 #+END_SRC
+** OS Specific settings
+Make sure that Mac Emacs loads the correct path.
+#+begin_src emacs-lisp
+    (use-package exec-path-from-shell
+      :if (memq window-system '(mac ns))
+      :config
+      (exec-path-from-shell-initialize)
+      ;; The above seems to set the current directory to /
+      ;; Reset that to home
+      (setq default-directory "~/"))
+#+end_src
 
 ** General emacs settings and plugins
 *** Basic settings
