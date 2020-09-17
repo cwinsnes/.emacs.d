@@ -106,6 +106,13 @@ Remove trailing whitespace upon save
     (global-auto-revert-mode)
     (diminish 'auto-revert-mode))
 #+END_SRC
+*** Understanding Emacs
+#+begin_src emacs-lisp
+  (use-package which-key
+    :config
+    (which-key-mode))
+#+end_src
+
 *** Programming settings
 Try to use space indententation essentially everywere.
 #+begin_src emacs-lisp
