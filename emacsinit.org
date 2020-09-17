@@ -147,6 +147,8 @@ for different groups of buffers.
   (use-package eyebrowse
   :diminish eyebrowse-mode
   :after evil
+  :init
+  (setq eyebrowse-keymap-prefix (kbd "C-9 C-S-j"))
   :config
   (setq eyebrowse-new-workspace "*scratch*")
   (eyebrowse-mode t)
@@ -479,7 +481,9 @@ Set up the basic settings of org-mode.
       (setq org-hide-emphasis-markers t)
       (setq org-startup-folded nil)
       (setq org-refile-targets (quote ((nil :maxlevel . 9)
-                                       (org-agenda-files :maxlevel . 9)))))
+                                       (org-agenda-files :maxlevel . 9))))
+      (define-key evil-org-mode-map (kbd "C-c C-w") 'org-refile)
+      (define-key org-mode-map (kbd "C-c C-w") 'org-refile))
 
     (require 'org-tempo)
     (setq org-agenda-files (file-expand-wildcards "~/org/*.org"))
@@ -497,7 +501,7 @@ Setup new capture templates.
            ("e" "Event" entry (file org-default-notes-file)
             "* EVENT %? :EVENT: \n%t\n")
            ("n" "New note" entry (file+headline org-default-notes-file "Quick notes")
-            "** NOTE %? \n%t\n")
+            "* NOTE %? \n%t\n")
            ("e" "Next Task" entry (file+headline org-default-notes-file "Tasks")
             "** NEXT %? \nDEADLINE: %t\n") ))
 
