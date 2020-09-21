@@ -458,7 +458,7 @@ Set up the basic settings of org-mode.
       (setq org-fontify-done-headline t)
       (setq org-todo-keywords
         '((sequence "TODO(t)" "DOING(o)" "|" "DONE(d)")
-          (sequence "MEETING(m)" "|")
+          (sequence "MEETING(m)" "|" "DONE(d)")
           (sequence "IDEA" "|")
           (sequence "NOTE" "|")
           (sequence "EVENT(e)" "|")
@@ -489,6 +489,7 @@ Set up the basic settings of org-mode.
     (setq org-agenda-files (file-expand-wildcards "~/org/*.org"))
 #+end_src
 
+**** Org capture
 Setup new capture templates.
 #+begin_src emacs-lisp
   (setq org-capture-templates
@@ -513,6 +514,7 @@ Setup new capture templates.
   (setq org-default-notes-file "~/org/index.org")
 #+end_src
 
+**** Org agenda
 Add a search system for org tags and such. Use this system to include
 any TODO/DOING task and ANY headline with a tag.
 #+BEGIN_SRC emacs-lisp
@@ -567,6 +569,25 @@ Then use org-super agenda to filter through the results of the search.
   (global-set-key (kbd "C-c a") (lambda () (interactive) (org-agenda nil "cav")))
 #+END_SRC
 
+**** Org recur
+Easier recurring tasks
+#+begin_src emacs-lisp
+  (use-package org-recur
+    :hook ((org-mode . org-recur-mode)
+           (org-agenda-mode . org-recur-agenda-mode))
+    :demand t
+    :config
+    (define-key org-recur-mode-map (kbd "C-c d") 'org-recur-finish)
+
+    ;; Rebind the 'd' key in org-agenda (default: `org-agenda-day-view').
+    (define-key org-recur-agenda-mode-map (kbd "d") 'org-recur-finish)
+    (define-key org-recur-agenda-mode-map (kbd "C-c d") 'org-recur-finish)
+
+    (setq org-recur-finish-done t
+          org-recur-finish-archive t))
+#+end_src
+
+**** Prettify org
 Prettify the way headlines and such look
 
 #+begin_src emacs-lisp
