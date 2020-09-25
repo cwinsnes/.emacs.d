@@ -707,13 +707,16 @@ Add tranclusion ability to org files
     (use-package blacken
       :hook
       (python-mode . blacken-mode))
-    (warn "Could not find black"))
+    (message "Could not find black"))
+
+  (when (executable-find "ipython")
+      (setq python-shell-interpreter "ipython"))
 
   (if (executable-find "isort")
     (use-package py-isort
       :after python
       :hook ((before-save . py-isort-before-save)))
-    (warn "Could not find isort"))
+    (message "Could not find isort"))
 #+end_src
 *** Rust
 Enable rust syntax highlighting and such.
@@ -755,6 +758,9 @@ Use irony mode for a better C mode experience.
   (use-package flycheck
     :config
     (global-flycheck-mode)
+    (add-hook 'python-mode-hook (lambda ()
+                                  (setq flycheck-checker 'python-flake8
+                                        flycheck-checker-error-threshold 99)))
     (define-key evil-normal-state-map (kbd "M-m") 'flycheck-next-error)
     (define-key evil-normal-state-map (kbd "M-n") 'flycheck-previous-error))
 #+end_src
@@ -827,7 +833,9 @@ Language server protocol. Works with company-mode!
           lsp-diagnostics-provider :flycheck)
     (setq lsp-idle-delay 0.2)
     ;; Python settings
-    (setq lsp-pyls-plugins-pydocstyle-enabled t)
+    (setq lsp-pyls-plugins-flake8-enabled t
+          lsp-pyls-plugins-pydocstyle-enabled t
+          lsp-pyls-plugins-pylint-enabled nil)
 
     (lsp-register-client
      (make-lsp-client :new-connection (lsp-tramp-connection "pyls")
