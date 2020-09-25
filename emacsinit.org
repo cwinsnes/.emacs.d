@@ -87,6 +87,11 @@ Make sure that Mac Emacs loads the correct path.
   ;; For the same reason, change read-output-max
   (setq read-process-output-max (* 1024 1024 5))
 
+  ;; Interlocking
+  ;; While interlocking is useful, it is extremely rare for this to be
+  ;; useful in my usecases and mostly causes annoyance instead.
+  (setq create-lockfiles nil)
+
   ;; Allow extra_files
   (add-to-list 'load-path "~/.emacs.d/extra_files")
 #+END_SRC
