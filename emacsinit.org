@@ -491,7 +491,7 @@ Set up the basic settings of org-mode.
       (define-key org-mode-map (kbd "C-c C-w") 'org-refile))
 
     (require 'org-tempo)
-    (setq org-agenda-files '("" "~/org/"))
+    (setq org-agenda-files '("~/org/"))
 #+end_src
 
 **** Org capture
@@ -532,6 +532,8 @@ any TODO/DOING task and ANY headline with a tag.
               (org-ql-block '(and (not (todo "DONE"))
                                   (or (todo "TODO")
                                       (tags "TODO")
+                                      (todo "DOING")
+                                      (tags "DOING")
                                       (tags "NEXT")
                                       (tags "todo")))
                             ((org-ql-block-header "To do")))
