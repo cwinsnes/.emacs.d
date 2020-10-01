@@ -4,11 +4,19 @@ Use org-babel-load-file to load the file.
 
 Essentially, the file should be loaded from your init.el using
 #+BEGIN_EXAMPLE
-  (require 'package)
-  (setq package-enable-at-startup nil)
-  (add-to-list 'package-archives
-               '("melpa" . "https://melpa.org/packages/"))
-  (package-initialize)
+  (setq straight-use-package-by-default t)
+  (defvar bootstrap-version)
+  (let ((bootstrap-file
+         (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+        (bootstrap-version 5))
+    (unless (file-exists-p bootstrap-file)
+      (with-current-buffer
+          (url-retrieve-synchronously
+           "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+           'silent 'inhibit-cookies)
+        (goto-char (point-max))
+        (eval-print-last-sexp)))
+    (load bootstrap-file nil 'nomessage))
 
   (org-babel-load-file (expand-file-name "~/.emacs.d/emacsinit.org"))
 #+END_EXAMPLE
@@ -30,13 +38,13 @@ Needs to be done here because it is used by use-package in configurations.
 ** OS Specific settings
 Make sure that Mac Emacs loads the correct path.
 #+begin_src emacs-lisp
-    (use-package exec-path-from-shell
-      :if (memq window-system '(mac ns))
-      :config
-      (exec-path-from-shell-initialize)
-      ;; The above seems to set the current directory to /
-      ;; Reset that to home
-      (setq default-directory "~/"))
+  (use-package exec-path-from-shell
+    :if (memq window-system '(mac ns))
+    :config
+    (exec-path-from-shell-initialize)
+    ;; The above seems to set the current directory to /
+    ;; Reset that to home
+    (setq default-directory "~/"))
 #+end_src
 
 ** General emacs settings and plugins
@@ -346,6 +354,7 @@ on last window of current tab.
       (evil-collection-init))
 
     (use-package evil-magit
+      :after magit
       :after evil
       :config
       (evil-ex-define-cmd "GCommit" 'magit-commit)
@@ -382,11 +391,11 @@ setting this up.
 Add surround, similar to the vim-surround package.
 Also define a couple of new surrounds.
 #+begin_src emacs-lisp
-(use-package evil-surround
-:diminish
-(evil-surround-mode)
-:config
-(global-evil-surround-mode 1))
+  (use-package evil-surround
+    :diminish
+    (evil-surround-mode)
+    :config
+    (global-evil-surround-mode 1))
 #+end_src
 
 ** File management
@@ -414,7 +423,8 @@ While it may not be used much it can be very handy sometimes.
 *** Magit
 [[https://magit.vc/][Magit]], the better interface to git.
 #+BEGIN_SRC emacs-lisp
-  (use-package magit)
+    (use-package magit
+      :defer 3)
 #+END_SRC
 *** Git gutter
 #+begin_src emacs-lisp
@@ -790,17 +800,22 @@ Completion engine for several languages
 *** Snippets
 #+begin_src emacs-lisp
   (use-package yasnippet
+    :defer 4
     :config
+
+    ;; Expand with yasnippet only if Company didn't complete the word before
+    (defvar my-company-point nil)
+    (advice-add 'company-complete-common
+                :before (lambda () (setq my-company-point (point))))
+    (advice-add 'company-complete-common
+                :after (lambda ()
+                         (when (equal my-company-point (point))
+                           (yas-expand))))
     (yas-global-mode 1))
 
-  (use-package yasnippet-snippets)
+  (use-package yasnippet-snippets
+    :after yasnippet)
 
-  ;; Expand with yasnippet only if Company didn't complete the word before
-  (defvar my-company-point nil)
-  (advice-add 'company-complete-common :before (lambda () (setq my-company-point (point))))
-  (advice-add 'company-complete-common :after (lambda ()
-                                                  (when (equal my-company-point (point))
-                                                    (yas-expand))))
 #+end_src
 
 *** Tags
