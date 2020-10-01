@@ -107,6 +107,7 @@ Make sure that Mac Emacs loads the correct path.
 Remove trailing whitespace upon save
 #+BEGIN_SRC emacs-lisp
   (use-package whitespace
+    :defer t
     :ensure nil
     :hook (before-save . delete-trailing-whitespace))
 #+END_SRC
@@ -142,6 +143,7 @@ Enable better minibuffer completions.
 
 #+begin_src emacs-lisp
   (use-package helm
+    :defer t
     :config
     (global-set-key (kbd "M-x") #'helm-M-x)
     (global-set-key (kbd "C-x C-f") #'helm-find-files)
@@ -424,7 +426,7 @@ While it may not be used much it can be very handy sometimes.
 [[https://magit.vc/][Magit]], the better interface to git.
 #+BEGIN_SRC emacs-lisp
     (use-package magit
-      :defer 3)
+      :defer 7)
 #+END_SRC
 *** Git gutter
 #+begin_src emacs-lisp
@@ -800,7 +802,7 @@ Completion engine for several languages
 *** Snippets
 #+begin_src emacs-lisp
   (use-package yasnippet
-    :defer 4
+    :defer 7
     :config
 
     ;; Expand with yasnippet only if Company didn't complete the word before
