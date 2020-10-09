@@ -367,6 +367,7 @@ setting this up.
     "f" 'helm-find-files
     "t" 'counsel-etags-virtual-update-tags
     "g" 'magit-status
+    "s" 'default-directory-phi-grep
     "h" 'evil-ex-nohighlight
     "b" 'helm-buffers-list
     "d" 'olivetti-mode)
@@ -445,6 +446,29 @@ Allows for using undo between session. Note that saving history to disk risks le
     :config
     (add-to-list 'tramp-remote-path "/snap/bin"))
 #+end_src
+*** Searching
+Better grep than the default one.
+#+begin_src emacs-lisp
+  (use-package phi-grep
+    :config
+    ;; Note: this one will be very slow for large file trees
+    (defun default-directory-phi-grep (regex)
+      (interactive
+       (list
+        (read-regexp (if (fboundp 'read-regexp) "Regexp" "Regexp: "))))
+      (phi-grep-in-directory default-directory regex))
+
+    (evil-define-key 'normal 'phi-grep-mode-map (kbd "RET") 'phi-grep-exit)
+    (add-to-list 'phi-grep-ignored-files "\.pth")
+    (add-to-list 'phi-grep-ignored-files "\.ipynb")
+    (add-to-list 'phi-grep-ignored-files "\.tif")
+    (add-to-list 'phi-grep-ignored-files "\.odp")
+    (add-to-list 'phi-grep-ignored-files "\.odf")
+    (add-to-list 'phi-grep-ignored-files "\.odt")
+    (add-to-list 'phi-grep-ignored-files "\.ods")
+    (add-to-list 'phi-grep-ignored-dirs "__pycache__")
+    (add-to-list 'phi-grep-ignored-dirs "\.mypy_cache"))
+#+end_src
 
 ** File types and languages
 *** Org-mode
@@ -487,8 +511,13 @@ Set up the basic settings of org-mode.
       (setq org-startup-folded nil)
       (setq org-refile-targets (quote ((nil :maxlevel . 9)
                                        (org-agenda-files :maxlevel . 9))))
+      ;; Save after refiling
+      (advice-add 'org-refile :after
+                  (lambda (&rest _)
+                    (org-save-all-org-buffers)))
       (define-key evil-org-mode-map (kbd "C-c C-w") 'org-refile)
       (define-key org-mode-map (kbd "C-c C-w") 'org-refile))
+
 
     (require 'org-tempo)
     (setq org-agenda-files '("~/org/"))
