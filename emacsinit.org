@@ -747,6 +747,23 @@ Add tranclusion ability to org files
     (add-hook 'org-mode-hook 'org-transclusion-mode))
 #+end_src
 
+**** Org-ref (bibliography)
+#+begin_src emacs-lisp
+  (use-package org-ref
+    :config
+    (setq
+     reftex-default-bibliography '("~/Dropbox/bibliography/references.bib")
+     org-ref-default-bibliography '("~/Dropbox/bibliography/references.bib")
+
+     org-ref-bibliography-notes "~/Dropbox/bibliography/notes.org"
+     org-ref-default-bibliography '("~/Dropbox/bibliography/references.bib")
+     org-ref-pdf-directory "~/Dropbox/bibliography/bibtex-pdfs/"
+
+     bibtex-completion-bibliography "~/Dropbox/bibliography/references.bib"
+     bibtex-completion-library-path "~/Dropbox/bibliography/bibtex-pdfs"
+     bibtex-completion-notes-path "~/Dropbox/bibliography/helm-bibtex-notes.org"))
+#+end_src
+
 *** Markdown
 #+begin_src emacs-lisp
   (setq markdown-fontify-code-blocks-natively t)
