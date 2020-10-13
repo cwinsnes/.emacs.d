@@ -120,6 +120,12 @@ Remove trailing whitespace upon save
     (global-auto-revert-mode)
     (diminish 'auto-revert-mode))
 #+END_SRC
+*** Keybindings
+Global keybindings and such.
+
+#+begin_src emacs-lisp
+  (global-set-key (kbd "M-=") 'align-regexp)
+#+end_src
 *** Understanding Emacs
 #+begin_src emacs-lisp
   (use-package which-key
@@ -335,6 +341,7 @@ on last window of current tab.
 #+begin_src emacs-lisp
   (evil-ex-define-cmd "q" 'delete-window)
   (evil-ex-define-cmd "quit" 'evil-quit)
+  (evil-ex-define-cmd "align" 'align-regexp)
 #+end_src
 **** Add key bindings for Evil in different modes
 
