@@ -771,6 +771,17 @@ Add tranclusion ability to org files
      bibtex-completion-notes-path "~/Dropbox/bibliography/helm-bibtex-notes.org"))
 #+end_src
 
+**** Org-latex
+Make sure that code blocks gets outputted with colors.
+#+begin_src emacs-lisp
+(add-to-list 'org-latex-packages-alist '("" "minted"))
+(setq org-latex-listings 'minted
+      org-latex-pdf-process
+      '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+        "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+        "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
+#+end_src
+
 *** Markdown
 #+begin_src emacs-lisp
   (setq markdown-fontify-code-blocks-natively t)
