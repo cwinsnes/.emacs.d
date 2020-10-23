@@ -312,6 +312,7 @@ Ways of making sure it is obvious which window is active and where the cursor is
     (dimmer-mode t))
 #+end_src
 ** evil-mode - Vim key bindings
+*** Basic evil settings
 Start by unbinding keys that might interfere later.
 #+BEGIN_SRC emacs-lisp
   (global-unset-key (kbd "C-w"))
@@ -343,7 +344,7 @@ on last window of current tab.
   (evil-ex-define-cmd "quit" 'evil-quit)
   (evil-ex-define-cmd "align" 'align-regexp)
 #+end_src
-**** Add key bindings for Evil in different modes
+*** Add key bindings for Evil in different modes
 
 #+begin_src emacs-lisp
     (use-package evil-org
@@ -369,7 +370,7 @@ on last window of current tab.
       (evil-ex-define-cmd "GCommit" 'magit-commit)
       (evil-ex-define-cmd "GAdd" 'magit-stage-file))
 #+END_SRC
-**** Evil Leader key
+*** Evil Leader key
 Add a leader key to evil, and set its bindings.  Yes, this is the same
 as simply adding keybindings for all this but I like the ease of
 setting this up.
@@ -397,7 +398,7 @@ setting this up.
   (global-evil-leader-mode)
   (evil-mode 1)
 #+END_SRC
-**** Extra Evil plugins
+*** Extra Evil plugins
 Add surround, similar to the vim-surround package.
 Also define a couple of new surrounds.
 #+begin_src emacs-lisp
@@ -477,7 +478,7 @@ Better grep than the default one.
         (read-regexp (if (fboundp 'read-regexp) "Regexp" "Regexp: "))))
       (phi-grep-in-directory default-directory regex))
 
-    (evil-define-key 'normal 'phi-grep-mode-map (kbd "RET") 'phi-grep-exit)
+    (evil-define-key 'normal phi-grep-mode-map (kbd "RET") 'phi-grep-exit)
     (add-to-list 'phi-grep-ignored-files "\.pth")
     (add-to-list 'phi-grep-ignored-files "\.ipynb")
     (add-to-list 'phi-grep-ignored-files "\.tif")
@@ -937,4 +938,13 @@ Language server protocol. Works with company-mode!
   (use-package lsp-ui
     :config
     (setq lsp-ui-doc-position 'bottom))
+#+end_src
+
+*** Indendation guides
+Especially helpful for deep python indentations.
+#+begin_src emacs-lisp
+  (use-package highlight-indentation
+    :config
+    (add-hook 'prog-mode-hook 'highlight-indentation-mode)
+    (add-hook 'prog-mode-hook 'highlight-indentation-current-column-mode))
 #+end_src
