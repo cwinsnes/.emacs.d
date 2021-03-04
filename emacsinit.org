@@ -58,7 +58,7 @@ Make sure that Mac Emacs loads the correct path.
   (display-time-mode 1)
   (blink-cursor-mode -1)
   ;; Enable emacs server
-  (server-start)
+  ;; (server-start)
 
   ;; Enable both line and column number in mode-line.
   (line-number-mode t)
@@ -245,7 +245,7 @@ The theme toggling code courtesy of Ivan in a [[https://emacs.stackexchange.com/
 
 Start by setting which themes can be cycled through.
 #+begin_src emacs-lisp
-  (setq ivan/themes '(doom-one-light doom-gruvbox))
+  (setq ivan/themes '(doom-gruvbox doom-one-light))
 #+end_src
 
 Then define cycling code.
@@ -376,7 +376,8 @@ as simply adding keybindings for all this but I like the ease of
 setting this up.
 #+BEGIN_SRC emacs-lisp
   ;; Evil leader has to be loaded before Evil to work in initial buffers.
-  (use-package evil-leader)
+  (use-package evil-leader
+    :after evil)
 
   (define-key evil-normal-state-map (kbd "C-f") 'helm-find-files)
   (evil-leader/set-leader "<SPC>")
@@ -850,6 +851,14 @@ Use irony mode for a better C mode experience.
                                         flycheck-checker-error-threshold 99)))
     (define-key evil-normal-state-map (kbd "M-m") 'flycheck-next-error)
     (define-key evil-normal-state-map (kbd "M-n") 'flycheck-previous-error))
+#+end_src
+*** Tree sitter
+Enable tree sitter for all available languages. Tree sitter information can be found at [[http://tree-sitter.github.io/tree-sitter/][Tree-sitter]].
+#+begin_src emacs-lisp
+  (use-package tree-sitter)
+  (use-package tree-sitter-langs
+    :config
+    (global-tree-sitter-mode))
 #+end_src
 *** Company mode
 Completion engine for several languages
