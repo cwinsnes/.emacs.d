@@ -404,10 +404,15 @@ Add surround, similar to the vim-surround package.
 Also define a couple of new surrounds.
 #+begin_src emacs-lisp
   (use-package evil-surround
-    :diminish
-    (evil-surround-mode)
     :config
     (global-evil-surround-mode 1))
+#+end_src
+
+Then add marks to the emacs fringe.
+#+begin_src emacs-lisp
+  (use-package evil-fringe-mark
+    :config
+    (global-evil-fringe-mark-mode))
 #+end_src
 
 ** File management
