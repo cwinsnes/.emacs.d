@@ -390,7 +390,8 @@ setting this up.
     "s" 'default-directory-phi-grep
     "h" 'evil-ex-nohighlight
     "b" 'helm-buffers-list
-    "d" 'olivetti-mode)
+    "d" 'olivetti-mode
+    "rn" 'lsp-rename)
 
   (with-eval-after-load 'evil-maps
     (define-key evil-normal-state-map (kbd "C-n") nil)
