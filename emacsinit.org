@@ -812,6 +812,12 @@ Make sure that code blocks gets outputted with colors.
       :hook ((before-save . py-isort-before-save)))
     (message "Could not find isort"))
 #+end_src
+
+Add highlighting to docstrings
+#+begin_src emacs-lisp
+  (use-package python-docstring
+    :hook ((python-mode . python-docstring-mode)))
+#+end_src
 *** Rust
 Enable rust syntax highlighting and such.
 #+begin_src emacs-lisp
