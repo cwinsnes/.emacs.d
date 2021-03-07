@@ -347,28 +347,28 @@ on last window of current tab.
 *** Add key bindings for Evil in different modes
 
 #+begin_src emacs-lisp
-    (use-package evil-org
-      :ensure t
-      :after org
-      :config
-      (add-hook 'org-mode-hook 'evil-org-mode)
-      (add-hook 'evil-org-mode-hook
-                (lambda ()
-                  (evil-org-set-key-theme)))
-      (require 'evil-org-agenda)
-      (evil-org-agenda-set-keys))
+  (use-package evil-org
+    :ensure t
+    :after org
+    :config
+    (add-hook 'org-mode-hook 'evil-org-mode)
+    (add-hook 'evil-org-mode-hook
+              (lambda ()
+                (evil-org-set-key-theme)))
+    (require 'evil-org-agenda)
+    (evil-org-agenda-set-keys))
 
-    (use-package evil-collection
-      :after evil
-      :config
-      (evil-collection-init))
+  (use-package evil-collection
+    :after evil
+    :config
+    (evil-collection-init))
 
-    (use-package evil-magit
-      :after magit
-      :after evil
-      :config
-      (evil-ex-define-cmd "GCommit" 'magit-commit)
-      (evil-ex-define-cmd "GAdd" 'magit-stage-file))
+  (use-package evil-magit
+    :after magit
+    :after evil
+    :config
+    (evil-ex-define-cmd "GCommit" 'magit-commit)
+    (evil-ex-define-cmd "GAdd" 'magit-stage-file))
 #+END_SRC
 *** Evil Leader key
 Add a leader key to evil, and set its bindings.  Yes, this is the same
@@ -463,9 +463,11 @@ Use projectile to easily find and search within projects.
 *** Persistent undo
 Allows for using undo between session. Note that saving history to disk risks leaking information.
 #+begin_src emacs-lisp
-(global-undo-tree-mode)
-(setq undo-tree-auto-save-history t)
-(setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo")))
+  (use-package undo-tree
+    :config
+    (global-undo-tree-mode)
+    (setq undo-tree-auto-save-history t)
+    (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo"))))
 #+end_src
 *** Remote editing
 #+begin_src emacs-lisp
@@ -542,7 +544,7 @@ Set up the basic settings of org-mode.
       (advice-add 'org-refile :after
                   (lambda (&rest _)
                     (org-save-all-org-buffers)))
-      (define-key evil-org-mode-map (kbd "C-c C-w") 'org-refile)
+      ;; (define-key evil-org-mode-map (kbd "C-c C-w") 'org-refile)
       (define-key org-mode-map (kbd "C-c C-w") 'org-refile))
 
 
