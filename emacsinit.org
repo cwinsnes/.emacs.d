@@ -840,7 +840,14 @@ Use irony mode for a better C mode experience.
     :after flycheck
     :config
     (eval-after-load 'flycheck
-      '(add-hook 'flycheck-mode-hook #'flycheck-irony-setup)))
+      '(add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
+    ;; Add ./include to the include paths.
+    (add-hook 'c-mode-hook
+            (lambda () (setq flycheck-gcc-include-path
+                             (list (expand-file-name "include/")))))
+    (add-hook 'c-mode-hook
+            (lambda () (setq flycheck-clang-include-path
+                             (list (expand-file-name "include/"))))))
 
 
   (use-package company-irony
