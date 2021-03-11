@@ -361,12 +361,7 @@ on last window of current tab.
   (use-package evil-collection
     :after evil
     :config
-    (evil-collection-init))
-
-  (use-package evil-magit
-    :after magit
-    :after evil
-    :config
+    (evil-collection-init)
     (evil-ex-define-cmd "GCommit" 'magit-commit)
     (evil-ex-define-cmd "GAdd" 'magit-stage-file))
 #+END_SRC
