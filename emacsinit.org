@@ -441,8 +441,7 @@ While it may not be used much it can be very handy sometimes.
 *** Magit
 [[https://magit.vc/][Magit]], the better interface to git.
 #+BEGIN_SRC emacs-lisp
-    (use-package magit
-      :defer 7)
+    (use-package magit)
 #+END_SRC
 *** Git gutter
 #+begin_src emacs-lisp
@@ -828,44 +827,44 @@ Enable rust syntax highlighting and such.
     (setq rust-format-on-save t)
     (define-key rust-mode-map (kbd "C-c C-c") 'rust-compile))
 #+end_src
-*** C
-Use irony mode for a better C mode experience.
+
+And enable flycheck to find rust cargo setup.
 #+begin_src emacs-lisp
-  (use-package irony
+  (use-package flycheck-rust
     :config
-    (add-hook 'c-mode-hook 'irony-mode)
-    (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options))
+    (with-eval-after-load 'rust-mode
+      (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)))
+#+end_src
+*** C
+#+begin_src emacs-lisp
+  (defun includepath()
+    "Return an include path."
+    (list (concat (projectile-project-root) "include/")))
 
-  (use-package flycheck-irony
-    :after flycheck
+  (use-package company-c-headers
+    :after (company projectile)
     :config
-    (eval-after-load 'flycheck
-      '(add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
-    ;; Add ./include to the include paths.
+    (setq company-c-headers-path-user 'includepath)
+    (add-to-list 'company-backends 'company-c-headers))
+
+  (use-package ccls
+    :after lsp-mode)
+
+  (use-package flycheck
+    :config
     (add-hook 'c-mode-hook
-            (lambda () (setq flycheck-gcc-include-path
-                             (list (expand-file-name "include/")))))
-    (add-hook 'c-mode-hook
-            (lambda () (setq flycheck-clang-include-path
-                             (list (expand-file-name "include/"))))))
+              (lambda ()
+                (setq flycheck-clang-include-path (includepath))
+                (setq flycheck-gcc-include-path (includepath)))))
+#+end_src
 
-
-  (use-package company-irony
-    :after company
-    :config
-    (eval-after-load 'company
-      '(add-to-list 'company-backends 'company-irony)))
-
-
-  (use-package irony-eldoc
-    :config
-    (add-hook 'irony-mode-hook #'irony-eldoc))
-
-
+Make doxygen style documentation highlighted.
+#+begin_src  emacs-lisp
   (use-package highlight-doxygen
     :config
     (add-hook 'c-mode-hook 'highlight-doxygen-mode))
 #+end_src
+
 ** General coding plugins
 *** Error checking
 #+begin_src emacs-lisp
@@ -878,6 +877,7 @@ Use irony mode for a better C mode experience.
     (define-key evil-normal-state-map (kbd "M-m") 'flycheck-next-error)
     (define-key evil-normal-state-map (kbd "M-n") 'flycheck-previous-error))
 #+end_src
+
 *** Tree sitter
 Enable tree sitter for all available languages. Tree sitter information can be found at [[http://tree-sitter.github.io/tree-sitter/][Tree-sitter]].
 #+begin_src emacs-lisp
@@ -953,6 +953,7 @@ Language server protocol. Works with company-mode!
     :hook
     (python-mode . lsp-deferred)
     (rust-mode . lsp-deferred)
+    (c-mode . lsp-deferred)
     :commands
     (lsp lsp-deferred)
     :config
