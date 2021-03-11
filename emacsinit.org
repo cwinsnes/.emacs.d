@@ -323,7 +323,6 @@ packages might set evil mode keys to their commands.
 #+BEGIN_SRC emacs-lisp
   (use-package evil
     :diminish evil-mode
-    :diminish undo-tree-mode
     :init
     (setq evil-want-C-u-scroll t)
     (setq evil-search-module 'evil-search)
@@ -454,15 +453,7 @@ Use projectile to easily find and search within projects.
     (define-key evil-normal-state-map (kbd "C-p") 'projectile-command-map)
     (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
 #+end_src
-*** Persistent undo
-Allows for using undo between session. Note that saving history to disk risks leaking information.
-#+begin_src emacs-lisp
-  (use-package undo-tree
-    :config
-    (global-undo-tree-mode)
-    (setq undo-tree-auto-save-history t)
-    (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo"))))
-#+end_src
+
 *** Remote editing
 #+begin_src emacs-lisp
   (use-package tramp
