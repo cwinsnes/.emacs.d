@@ -411,6 +411,24 @@ Then add marks to the emacs fringe.
 #+end_src
 
 ** File management
+*** Undo-tree
+Enable undo-tree functionality, and make sure that Evil uses it.
+#+begin_src emacs-lisp
+  (use-package undo-tree
+    :config
+    (global-undo-tree-mode)
+    (evil-set-undo-system 'undo-tree))
+#+end_src
+
+And enable persistent undo
+#+begin_src emacs-lisp
+    (setq undo-tree-auto-save-history t)
+    (let* ((directory (expand-file-name "~/.emacs.d/undo")))
+      (unless (file-exists-p directory)
+        (make-directory directory))
+      (setq undo-tree-history-directory-alist `(("." . ,directory))))
+#+end_src
+
 *** Unique buffer names
 When working with buffers that have the same name, make emacs display
 them using forward style instead of the default post-forward.
