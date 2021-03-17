@@ -511,6 +511,8 @@ Set up the basic settings of org-mode.
   (use-package org
       :ensure nil
       :config
+      (setq org-priority-highest org-highest-priority)
+      (setq org-priority-lowest org-lowest-priority)
       (custom-set-faces
        '(org-headline-done
          ((((class color) (min-colors 16))
