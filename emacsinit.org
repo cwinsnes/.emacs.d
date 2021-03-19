@@ -22,12 +22,20 @@ Essentially, the file should be loaded from your init.el using
 #+END_EXAMPLE
 
 * Init
+Start by setting lexical binding to true, which might make the loading of this file faster in theory.
+#+begin_src emacs-lisp
+;;; -*- lexical-binding: t; -*-
+#+end_src
+
 ** use-package configuration
 We are going to be using use-package as a package manager and
 package configuration system. This has to be done first in the
 file!
 #+BEGIN_SRC emacs-lisp
   (straight-use-package 'use-package)
+  (eval-when-compile
+    (require 'use-package))
+  (setq use-package-compute-statistics t)
 #+END_SRC
 
 Add ability to diminish minor modes from list.
@@ -39,6 +47,7 @@ Needs to be done here because it is used by use-package in configurations.
 Make sure that Mac Emacs loads the correct path.
 #+begin_src emacs-lisp
   (use-package exec-path-from-shell
+    :defer t
     :if (memq window-system '(mac ns))
     :config
     (exec-path-from-shell-initialize)
@@ -107,18 +116,15 @@ Make sure that Mac Emacs loads the correct path.
 Remove trailing whitespace upon save
 #+BEGIN_SRC emacs-lisp
   (use-package whitespace
-    :defer t
     :ensure nil
     :hook (before-save . delete-trailing-whitespace))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
-  (use-package emacs
-    :ensure nil
-    :config
-
-    (global-auto-revert-mode)
-    (diminish 'auto-revert-mode))
+  (add-hook 'after-init-hook
+    (lambda ()
+      (global-auto-revert-mode)
+      (diminish 'auto-revert-mode)))
 #+END_SRC
 *** Keybindings
 Global keybindings and such.
@@ -149,17 +155,17 @@ Enable better minibuffer completions.
 
 #+begin_src emacs-lisp
   (use-package helm
-    :defer t
-    :config
+    :init
     (global-set-key (kbd "M-x") #'helm-M-x)
     (global-set-key (kbd "C-x C-f") #'helm-find-files)
+    :config
     (setq helm-ff-skip-boring-files 1)
-    (helm-mode 1)
-
     (bind-key (kbd "C-w") 'backward-kill-word helm-map)
-    (bind-key "<escape>" 'helm-keyboard-quit helm-map))
+    (bind-key "<escape>" 'helm-keyboard-quit helm-map)
+    (add-hook 'after-init-hook (lambda () (helm-mode 1))))
 
-  (use-package helm-org)
+  (use-package helm-org
+    :after helm)
 #+end_src
 *** Eye-browse
 Add a tab-like configuration instead of having to use multiple frames
@@ -167,6 +173,7 @@ for different groups of buffers.
 #+begin_src emacs-lisp
   (use-package eyebrowse
   :diminish eyebrowse-mode
+  :defer 3
   :after evil
   :init
   (setq eyebrowse-keymap-prefix (kbd "C-9 C-S-j"))
@@ -199,6 +206,7 @@ Olivett is chosen specifically because it doesn't mess with other
 frames, which is nice in combination with EyeBrowse.
 #+begin_src emacs-lisp
   (use-package olivetti
+    :defer t
     :config
     (setq-default olivetti-body-width 100)
     (setq olivetti-mode-on-hook '()))
@@ -222,16 +230,17 @@ If the fonts are not already installed, install that as well.
 #+END_SRC
 
 #+begin_src emacs-lisp
-  (use-package emacs
-    :init
-    (set-face-attribute 'default nil :font "DejaVu Sans Mono-10" )
-    (set-frame-font "Dejavu Sans Mono-10" nil t))
+  (add-hook 'emacs-startup-hook
+    (lambda ()
+      (set-face-attribute 'default nil :font "DejaVu Sans Mono-10")
+      (set-frame-font "Dejavu Sans Mono-10" nil t)))
 #+end_src
 
 **** Themes
 Use Doom emacs themes
 #+BEGIN_SRC emacs-lisp
   (use-package doom-themes
+    :defer 1
     :config
     (setq doom-themes-enable-bold t
           doom-themes-enable-italic t)
@@ -278,7 +287,8 @@ And finally enable the first theme in the list.
 **** Look
 #+begin_src emacs-lisp
   (use-package doom-modeline
-    :init (doom-modeline-mode 1))
+    :defer 0.4
+    :config (doom-modeline-mode 1))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -295,17 +305,18 @@ Make delimiters have matched rainbow colors for easier distinguishing.
 Make identifiers have unique colors in supported modes.
 #+begin_src emacs-lisp
   (use-package color-identifiers-mode
-    :config
-    (add-hook 'after-init-hook 'global-color-identifiers-mode))
+    :hook (after-init-hook . global-color-identifiers-mode))
 #+end_src
 **** Cursor tracking
 Ways of making sure it is obvious which window is active and where the cursor is.
 #+begin_src emacs-lisp
   (use-package beacon
+    :defer 4
     :config
     (beacon-mode 1))
 
   (use-package dimmer
+    :defer 4
     :config
     (dimmer-configure-company-box)
     (dimmer-configure-helm)
@@ -322,6 +333,7 @@ Use Vim key bindings by default. Do note that some of the other
 packages might set evil mode keys to their commands.
 #+BEGIN_SRC emacs-lisp
   (use-package evil
+    :defer t
     :diminish evil-mode
     :init
     (setq evil-want-C-u-scroll t)
@@ -330,6 +342,7 @@ packages might set evil mode keys to their commands.
 
   ;; Enable the use of z-<buttons> for folding
   (use-package hideshow
+    :after evil
     :config
     (add-hook 'prog-mode-hook 'hs-minor-mode))
 #+END_SRC
@@ -339,16 +352,17 @@ entirely. This is mostly important when working with eyebrowse or
 similar tabbing items as =:q= by default will kill emacs entirely if
 on last window of current tab.
 #+begin_src emacs-lisp
+(with-eval-after-load "evil"
   (evil-ex-define-cmd "q" 'delete-window)
   (evil-ex-define-cmd "quit" 'evil-quit)
-  (evil-ex-define-cmd "align" 'align-regexp)
+  (evil-ex-define-cmd "align" 'align-regexp))
 #+end_src
 *** Add key bindings for Evil in different modes
 
 #+begin_src emacs-lisp
   (use-package evil-org
     :ensure t
-    :after org
+    :after (evil org)
     :config
     (add-hook 'org-mode-hook 'evil-org-mode)
     (add-hook 'evil-org-mode-hook
@@ -371,34 +385,33 @@ setting this up.
 #+BEGIN_SRC emacs-lisp
   ;; Evil leader has to be loaded before Evil to work in initial buffers.
   (use-package evil-leader
-    :after evil)
-
-  (define-key evil-normal-state-map (kbd "C-f") 'helm-find-files)
-  (evil-leader/set-leader "<SPC>")
-  (evil-leader/set-key
-    "w" 'save-buffer
-    "o" 'delete-other-windows
-    "f" 'helm-find-files
-    "t" 'counsel-etags-virtual-update-tags
-    "g" 'magit-status
-    "s" 'default-directory-phi-grep
-    "h" 'evil-ex-nohighlight
-    "b" 'helm-buffers-list
-    "d" 'olivetti-mode
-    "rn" 'lsp-rename)
+    :after evil
+    :config
+    (define-key evil-normal-state-map (kbd "C-f") 'helm-find-files)
+    (evil-leader/set-leader "<SPC>")
+    (evil-leader/set-key
+      "w" 'save-buffer
+      "o" 'delete-other-windows
+      "f" 'helm-find-files
+      "t" 'counsel-etags-virtual-update-tags
+      "g" 'magit-status
+      "s" 'default-directory-phi-grep
+      "h" 'evil-ex-nohighlight
+      "b" 'helm-buffers-list
+      "d" 'olivetti-mode
+      "rn" 'lsp-rename))
 
   (with-eval-after-load 'evil-maps
     (define-key evil-normal-state-map (kbd "C-n") nil)
     (define-key evil-normal-state-map (kbd "C-p") nil))
 
-  (global-evil-leader-mode)
-  (evil-mode 1)
 #+END_SRC
 *** Extra Evil plugins
 Add surround, similar to the vim-surround package.
 Also define a couple of new surrounds.
 #+begin_src emacs-lisp
   (use-package evil-surround
+    :after evil
     :config
     (global-evil-surround-mode 1))
 #+end_src
@@ -406,8 +419,16 @@ Also define a couple of new surrounds.
 Then add marks to the emacs fringe.
 #+begin_src emacs-lisp
   (use-package evil-fringe-mark
+    :after evil
     :config
     (global-evil-fringe-mark-mode))
+#+end_src
+
+*** Enabling evil mode
+This section needs to be last in the evil-mode section as it finally enables the things.
+#+begin_src emacs-lisp
+  (global-evil-leader-mode)
+  (evil-mode 1)
 #+end_src
 
 ** File management
@@ -422,11 +443,11 @@ Enable undo-tree functionality, and make sure that Evil uses it.
 
 And enable persistent undo
 #+begin_src emacs-lisp
-    (setq undo-tree-auto-save-history t)
-    (let* ((directory (expand-file-name "~/.emacs.d/undo")))
-      (unless (file-exists-p directory)
-        (make-directory directory))
-      (setq undo-tree-history-directory-alist `(("." . ,directory))))
+  (setq undo-tree-auto-save-history t)
+  (let* ((directory (expand-file-name "~/.emacs.d/undo")))
+    (unless (file-exists-p directory)
+      (make-directory directory))
+    (setq undo-tree-history-directory-alist `(("." . ,directory))))
 #+end_src
 
 *** Unique buffer names
@@ -445,6 +466,7 @@ Add a file browser system to emacs.
 While it may not be used much it can be very handy sometimes.
 #+BEGIN_SRC emacs-lisp
   (use-package neotree
+    :defer t
     :config
     (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
     (define-key evil-normal-state-map [f8] 'neotree-toggle)
@@ -453,7 +475,8 @@ While it may not be used much it can be very handy sometimes.
 *** Magit
 [[https://magit.vc/][Magit]], the better interface to git.
 #+BEGIN_SRC emacs-lisp
-    (use-package magit)
+  (use-package magit
+    :defer t)
 #+END_SRC
 *** Git gutter
 #+begin_src emacs-lisp
@@ -466,15 +489,21 @@ While it may not be used much it can be very handy sometimes.
 Use projectile to easily find and search within projects.
 #+begin_src emacs-lisp
   (use-package projectile
+    :after helm
+    :defer 1
     :config
     (projectile-mode 1)
     (define-key evil-normal-state-map (kbd "C-p") 'projectile-command-map)
     (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
+
+  (use-package helm-projectile
+    :after projectile)
 #+end_src
 
 *** Remote editing
 #+begin_src emacs-lisp
   (use-package tramp
+    :no-require t
     :config
     (add-to-list 'tramp-remote-path "/snap/bin"))
 #+end_src
@@ -509,52 +538,53 @@ Set up the basic settings of org-mode.
   (straight-override-recipe
      '(org :type git :host github :repo "emacsmirror/org" :no-build t))
   (use-package org
-      :ensure nil
-      :config
-      (setq org-priority-highest org-highest-priority)
-      (setq org-priority-lowest org-lowest-priority)
-      (custom-set-faces
-       '(org-headline-done
-         ((((class color) (min-colors 16))
-           (:foreground "light gray")))))
+    :defer 1
+    :ensure nil
+    :config
+    (setq org-priority-highest org-highest-priority)
+    (setq org-priority-lowest org-lowest-priority)
+    (custom-set-faces
+     '(org-headline-done
+       ((((class color) (min-colors 16))
+         (:foreground "light gray")))))
 
-      (setq org-fontify-done-headline t)
-      (setq org-todo-keywords
-        '((sequence "TODO(t)" "DOING(o)" "|" "DONE(d)")
-          (sequence "MEETING(m)" "|" "DONE(d)")
-          (sequence "IDEA" "|")
-          (sequence "NOTE" "|")
-          (sequence "EVENT(e)" "|")
-          (sequence "NEXT" "|")
-          (sequence "|" "CANCELED(c)")))
-      (setq org-todo-keyword-faces
-        '(("TODO" . (:foreground "red" :weight bold))
-          ("NEXT" . (:foreground "red" :weight bold))
-          ("DOING" . "yellow")
-          ("EVENT" . (:foreground "orange" :weight bold))
-          ("DONE" . (:foreground "green" :weight bold))
-          ("MEETING" . (:foreground "blue" :weight bold))
-          ("IDEA" . (:foreground "purple" :weight bold))
-          ("NOTE" . (:foreground "purple" :weight bold))
-          ("CANCELED" . (:foreground "gray" :weight bold))))
-      ;; Make single space end sentences.
-      (setq sentence-end-double-space nil)
-      (add-hook 'org-mode-hook 'org-indent-mode)
-      (eval-after-load 'org-indent '(diminish 'org-indent-mode))
-      (setq org-hide-emphasis-markers t)
-      (setq org-startup-folded nil)
-      (setq org-refile-targets (quote ((nil :maxlevel . 9)
-                                       (org-agenda-files :maxlevel . 9))))
-      ;; Save after refiling
-      (advice-add 'org-refile :after
-                  (lambda (&rest _)
-                    (org-save-all-org-buffers)))
-      ;; (define-key evil-org-mode-map (kbd "C-c C-w") 'org-refile)
-      (define-key org-mode-map (kbd "C-c C-w") 'org-refile))
-
+    (setq org-fontify-done-headline t)
+    (setq org-todo-keywords
+          '((sequence "TODO(t)" "DOING(o)" "|" "DONE(d)")
+            (sequence "MEETING(m)" "|" "DONE(d)")
+            (sequence "IDEA" "|")
+            (sequence "NOTE" "|")
+            (sequence "EVENT(e)" "|")
+            (sequence "NEXT" "|")
+            (sequence "|" "CANCELED(c)")))
+    (setq org-todo-keyword-faces
+          '(("TODO" . (:foreground "red" :weight bold))
+            ("NEXT" . (:foreground "red" :weight bold))
+            ("DOING" . "yellow")
+            ("EVENT" . (:foreground "orange" :weight bold))
+            ("DONE" . (:foreground "green" :weight bold))
+            ("MEETING" . (:foreground "blue" :weight bold))
+            ("IDEA" . (:foreground "purple" :weight bold))
+            ("NOTE" . (:foreground "purple" :weight bold))
+            ("CANCELED" . (:foreground "gray" :weight bold))))
+    ;; Make single space end sentences.
+    (setq sentence-end-double-space nil)
+    (add-hook 'org-mode-hook 'org-indent-mode)
+    (eval-after-load 'org-indent '(diminish 'org-indent-mode))
+    (setq org-hide-emphasis-markers t)
+    (setq org-startup-folded nil)
+    (setq org-refile-targets (quote ((nil :maxlevel . 9)
+                                     (org-agenda-files :maxlevel . 9))))
+    ;; Save after refiling
+    (advice-add 'org-refile :after
+                (lambda (&rest _)
+                  (org-save-all-org-buffers)))
+    ;; (define-key evil-org-mode-map (kbd "C-c C-w") 'org-refile)
+    (define-key org-mode-map (kbd "C-c C-w") 'org-refile)
 
     (require 'org-tempo)
     (setq org-agenda-files '("~/org/"))
+  )
 #+end_src
 
 **** Org capture
@@ -587,8 +617,8 @@ Add a search system for org tags and such. Use this system to include
 any TODO/DOING task and ANY headline with a tag.
 #+BEGIN_SRC emacs-lisp
   (use-package org-ql
+    :defer 2
     :config
-
     (setq org-agenda-custom-commands
           '(("cav" "Custom Agenda View"
              ((agenda)
@@ -614,6 +644,7 @@ any TODO/DOING task and ANY headline with a tag.
 Then use org-super agenda to filter through the results of the search.
 #+BEGIN_SRC emacs-lisp
   (use-package org-super-agenda
+    :after org
     :config
     (setq org-super-agenda-groups
           '((:discard (:tag ("ignore")))
@@ -646,6 +677,7 @@ Then use org-super agenda to filter through the results of the search.
 Easier recurring tasks
 #+begin_src emacs-lisp
   (use-package org-recur
+    :after org
     :hook ((org-mode . org-recur-mode)
            (org-agenda-mode . org-recur-agenda-mode))
     :demand t
@@ -733,6 +765,8 @@ Do not prettify current line.
 
 **** Org-wiki
 #+begin_src emacs-lisp
+  (add-hook 'after-init-hook
+    (lambda ()
   (load "org-wiki/org-wiki")
   (setq org-wiki-location "~/org")
 
@@ -757,13 +791,14 @@ Do not prettify current line.
   (define-key org-mode-map (kbd "C-c n i") 'org-wiki-insert-link)
   (define-key org-mode-map (kbd "C-c n m") 'org-wiki-insert-new)
   (define-key org-mode-map (kbd "C-c n n") 'org-wiki-new)
-  (define-key org-mode-map (kbd "C-c n a") 'org-insert-link)
+  (define-key org-mode-map (kbd "C-c n a") 'org-insert-link)))
 #+end_src
 
 **** Org-transclusion
 Add tranclusion ability to org files
 #+begin_src emacs-lisp
   (use-package org-transclusion
+    :defer t
     :straight (org-transclusion :type git :host github :repo "cwinsnes/org-transclusion")
     :config
     (add-hook 'org-mode-hook 'org-transclusion-mode))
@@ -772,6 +807,7 @@ Add tranclusion ability to org files
 **** Org-ref (bibliography)
 #+begin_src emacs-lisp
   (use-package org-ref
+    :defer
     :config
     (setq
      reftex-default-bibliography '("~/Dropbox/bibliography/references.bib")
@@ -806,6 +842,7 @@ Make sure that code blocks gets outputted with colors.
   (setq python-shell-interpreter "python3")
   (if (executable-find "black")
     (use-package blacken
+      :defer t
       :hook
       (python-mode . blacken-mode))
     (message "Could not find black"))
@@ -815,6 +852,7 @@ Make sure that code blocks gets outputted with colors.
 
   (if (executable-find "isort")
     (use-package py-isort
+      :defer t
       :after python
       :hook ((before-save . py-isort-before-save)))
     (message "Could not find isort"))
@@ -837,6 +875,7 @@ Enable rust syntax highlighting and such.
 And enable flycheck to find rust cargo setup.
 #+begin_src emacs-lisp
   (use-package flycheck-rust
+    :defer t
     :config
     (with-eval-after-load 'rust-mode
       (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)))
@@ -875,6 +914,7 @@ Make doxygen style documentation highlighted.
 *** Error checking
 #+begin_src emacs-lisp
   (use-package flycheck
+    :defer 2
     :config
     (global-flycheck-mode)
     (add-hook 'python-mode-hook (lambda ()
@@ -887,8 +927,10 @@ Make doxygen style documentation highlighted.
 *** Tree sitter
 Enable tree sitter for all available languages. Tree sitter information can be found at [[http://tree-sitter.github.io/tree-sitter/][Tree-sitter]].
 #+begin_src emacs-lisp
-  (use-package tree-sitter)
+  (use-package tree-sitter
+    :defer t)
   (use-package tree-sitter-langs
+    :defer 5
     :config
     (global-tree-sitter-mode))
 #+end_src
@@ -908,7 +950,7 @@ Completion engine for several languages
 *** Snippets
 #+begin_src emacs-lisp
   (use-package yasnippet
-    :defer 7
+    :defer 5
     :config
 
     ;; Expand with yasnippet only if Company didn't complete the word before
@@ -931,6 +973,7 @@ Make tags work better in Emacs and auto use the correct files.
 Will fallback to ripgrep if no tags file is found.
 #+begin_src emacs-lisp
   (use-package counsel-etags
+    :defer t
     :bind (("C-]" . counsel-etags-find-tag-at-point))
     :init
     ;; Don't ask before rereading the TAGS files if they have changed
@@ -956,6 +999,7 @@ Language server protocol. Works with company-mode!
 
 #+begin_src emacs-lisp
   (use-package lsp-mode
+    :defer 5
     :hook
     (python-mode . lsp-deferred)
     (rust-mode . lsp-deferred)
@@ -978,6 +1022,7 @@ Language server protocol. Works with company-mode!
                       :server-id 'pyls-remote)))
 
   (use-package lsp-ui
+    :after lsp-mode
     :config
     (setq lsp-ui-doc-position 'bottom))
 #+end_src
@@ -986,7 +1031,20 @@ Language server protocol. Works with company-mode!
 Especially helpful for deep python indentations.
 #+begin_src emacs-lisp
   (use-package highlight-indentation
-    :config
-    (add-hook 'prog-mode-hook 'highlight-indentation-mode)
-    (add-hook 'prog-mode-hook 'highlight-indentation-current-column-mode))
+    :hook ((prog-mode . highlight-indentation-mode)
+           (prog-mode . highlight-indentation-current-column-mode)))
+#+end_src
+
+#+begin_src emacs-lisp
+;; Startup time
+(defun efs/display-startup-time ()
+  (message
+   "Emacs loaded in %s with %d garbage collections."
+   (format
+    "%.2f seconds"
+    (float-time
+     (time-subtract after-init-time before-init-time)))
+   gcs-done))
+
+(add-hook 'emacs-startup-hook #'efs/display-startup-time)
 #+end_src
